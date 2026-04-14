@@ -1,0 +1,6 @@
+@AttendVisionReportsApi_HostAddress = http://localhost:5150
+
+GET {{AttendVisionReportsApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
