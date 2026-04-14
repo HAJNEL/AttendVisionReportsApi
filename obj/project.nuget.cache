@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "aoOpCzF80G4=",
+  "dgSpecHash": "zK/sozB3piQ=",
   "success": true,
-  "projectFilePath": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj",
+  "projectFilePath": "C:\\Projects\\Other\\AttendVisionReportsWebAppApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hajne\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
     "C:\\Users\\hajne\\.nuget\\packages\\dapper\\2.1.72\\dapper.2.1.72.nupkg.sha512",

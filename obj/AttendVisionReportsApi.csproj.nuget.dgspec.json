@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj": {}
+    "C:\\Projects\\Other\\AttendVisionReportsWebAppApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj": {}
   },
   "projects": {
-    "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj": {
+    "C:\\Projects\\Other\\AttendVisionReportsWebAppApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj",
+        "projectUniqueName": "C:\\Projects\\Other\\AttendVisionReportsWebAppApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj",
         "projectName": "AttendVisionReportsApi",
-        "projectPath": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj",
+        "projectPath": "C:\\Projects\\Other\\AttendVisionReportsWebAppApi\\AttendVisionReportsApi\\AttendVisionReportsApi.csproj",
         "packagesPath": "C:\\Users\\hajne\\.nuget\\packages\\",
-        "outputPath": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\obj\\",
+        "outputPath": "C:\\Projects\\Other\\AttendVisionReportsWebAppApi\\AttendVisionReportsApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

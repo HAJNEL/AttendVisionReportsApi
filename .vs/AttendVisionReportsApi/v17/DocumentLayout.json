@@ -1,0 +1,234 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\dtos\\authdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\services\\roleservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\services\\roleservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\services\\idashboardservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\services\\idashboardservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\services\\dashboardservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\services\\dashboardservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\services\\icompanyservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\services\\icompanyservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\services\\companyservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\services\\companyservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\dtos\\departmentdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\dtos\\departmentdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\controllers\\companiescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\controllers\\companiescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\controllers\\departmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\controllers\\departmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|c:\\projects\\other\\attendvisionreportsapi\\attendvisionreportsapi\\attendvisionreportsapi\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2DB728AE-19E7-4C5C-8A24-60DB2E4BF0E1}|AttendVisionReportsApi\\AttendVisionReportsApi.csproj|solutionrelative:attendvisionreportsapi\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAEwB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T11:11:49.715Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AuthDtos.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\DTOs\\AuthDtos.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\DTOs\\AuthDtos.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\DTOs\\AuthDtos.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\DTOs\\AuthDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAABYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T08:29:52.599Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Services\\AuthService.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\AuthService.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Services\\AuthService.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAiwCQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T08:28:59.933Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IDashboardService.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\IDashboardService.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Services\\IDashboardService.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\IDashboardService.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Services\\IDashboardService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T08:25:20.678Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ICompanyService.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\ICompanyService.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Services\\ICompanyService.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\ICompanyService.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Services\\ICompanyService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T08:25:18.889Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "DashboardService.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\DashboardService.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Services\\DashboardService.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\DashboardService.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Services\\DashboardService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T08:25:16.22Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\UserService.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Services\\UserService.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\UserService.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Services\\UserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T08:23:52.301Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "RoleService.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\RoleService.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Services\\RoleService.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\RoleService.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Services\\RoleService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T08:23:51.182Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "CompanyService.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\CompanyService.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Services\\CompanyService.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Services\\CompanyService.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Services\\CompanyService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T21:47:24.172Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "DepartmentDtos.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\DTOs\\DepartmentDtos.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\DTOs\\DepartmentDtos.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\DTOs\\DepartmentDtos.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\DTOs\\DepartmentDtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T23:00:20.687Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "CompaniesController.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Controllers\\CompaniesController.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Controllers\\CompaniesController.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Controllers\\CompaniesController.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Controllers\\CompaniesController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T21:43:14.6Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "DepartmentsController.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Controllers\\DepartmentsController.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Controllers\\DepartmentsController.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Controllers\\DepartmentsController.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Controllers\\DepartmentsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T12:25:08.025Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "DashboardController.cs",
+              "DocumentMoniker": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Controllers\\DashboardController.cs",
+              "RelativeDocumentMoniker": "AttendVisionReportsApi\\Controllers\\DashboardController.cs",
+              "ToolTip": "C:\\Projects\\Other\\AttendVisionReportsApi\\AttendVisionReportsApi\\AttendVisionReportsApi\\Controllers\\DashboardController.cs",
+              "RelativeToolTip": "AttendVisionReportsApi\\Controllers\\DashboardController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T12:25:06.54Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
