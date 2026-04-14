@@ -3,19 +3,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AttendVisionReportsApi.Models
 {
-    [Table("user_roles")]
-    public class UserRole
+    public class RolePermission
     {
         [Key]
         [Column("id")]
         public Guid Id { get; set; }
-        [Column("user_id")]
-        public Guid UserId { get; set; }
-        public User User { get; set; } = null!;
-        [Column("role_id")]
         public Guid RoleId { get; set; }
         public Role Role { get; set; } = null!;
-        [Column("assigned_at")]
+        public Guid PermissionId { get; set; }
+        public Permission Permission { get; set; } = null!;
         public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
     }
 }

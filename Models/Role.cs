@@ -7,13 +7,10 @@ namespace AttendVisionReportsApi.Models
     {
         [Column("id")]
         public Guid Id { get; set; }
-        [Column("parentid")]
-        public Guid? ParentId { get; set; }
         [Column("name")]
         public string Name { get; set; } = string.Empty;
         [Column("description")]
         public string? Description { get; set; }
-        [Column("uniquecode")]
-        public string UniqueCode { get; set; } = string.Empty;
+        public ICollection<RolePermission>? RolePermissions { get; set; }
     }
 }

@@ -11,5 +11,10 @@ namespace AttendVisionReportsApi.Services
         Task<bool> DeleteAsync(Guid id);
         Task<bool> AssignRoleAsync(Guid userId, Guid roleId);
         Task<bool> RemoveRoleAsync(Guid userId, Guid roleId);
+
+        // Permission management for roles
+        Task<bool> AssignPermissionAsync(Guid roleId, Guid permissionId);
+        Task<bool> RemovePermissionAsync(Guid roleId, Guid permissionId);
+        Task<IEnumerable<PermissionDto>> GetPermissionsAsync(Guid roleId);
     }
 }

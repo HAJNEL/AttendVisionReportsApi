@@ -39,6 +39,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
 builder.Services.AddScoped<IReportsService, ReportsService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
 
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IRoleService, RoleService>();

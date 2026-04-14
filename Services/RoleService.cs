@@ -11,20 +11,16 @@ namespace AttendVisionReportsApi.Services
             await db.Roles.Select(r => new RoleDto
             {
                 Id = r.Id,
-                ParentId = r.ParentId,
                 Name = r.Name,
                 Description = r.Description,
-                UniqueCode = r.UniqueCode
             }).ToListAsync();
 
         public async Task<RoleDto?> GetByIdAsync(Guid id) =>
             await db.Roles.Where(r => r.Id == id).Select(r => new RoleDto
             {
                 Id = r.Id,
-                ParentId = r.ParentId,
                 Name = r.Name,
                 Description = r.Description,
-                UniqueCode = r.UniqueCode
             }).FirstOrDefaultAsync();
 
         public async Task<RoleDto> CreateAsync(CreateRoleDto dto)
@@ -32,10 +28,8 @@ namespace AttendVisionReportsApi.Services
             var role = new Role
             {
                 Id = Guid.NewGuid(),
-                ParentId = dto.ParentId,
                 Name = dto.Name,
-                Description = dto.Description,
-                UniqueCode = dto.UniqueCode
+                Description = dto.Description
             };
             db.Roles.Add(role);
             await db.SaveChangesAsync();
@@ -46,10 +40,8 @@ namespace AttendVisionReportsApi.Services
         {
             var role = await db.Roles.FindAsync(id);
             if (role == null) return null;
-            if (dto.ParentId.HasValue) role.ParentId = dto.ParentId;
             if (!string.IsNullOrEmpty(dto.Name)) role.Name = dto.Name;
             if (!string.IsNullOrEmpty(dto.Description)) role.Description = dto.Description;
-            if (!string.IsNullOrEmpty(dto.UniqueCode)) role.UniqueCode = dto.UniqueCode;
             await db.SaveChangesAsync();
             return await GetByIdAsync(role.Id);
         }
@@ -63,14 +55,49 @@ namespace AttendVisionReportsApi.Services
             return true;
         }
 
+
+        public async Task<bool> AssignPermissionAsync(Guid roleId, Guid permissionId)
+        {
+            var exists = await db.RolePermissions.AnyAsync(rp => rp.RoleId == roleId && rp.PermissionId == permissionId);
+            if (exists) return false;
+            db.RolePermissions.Add(new RolePermission { Id = Guid.NewGuid(), RoleId = roleId, PermissionId = permissionId });
+            await db.SaveChangesAsync();
+            return true;
+        }
+
+
+        public async Task<bool> RemovePermissionAsync(Guid roleId, Guid permissionId)
+        {
+            var rp = await db.RolePermissions.FirstOrDefaultAsync(rp => rp.RoleId == roleId && rp.PermissionId == permissionId);
+            if (rp == null) return false;
+            db.RolePermissions.Remove(rp);
+            await db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IEnumerable<PermissionDto>> GetPermissionsAsync(Guid roleId)
+        {
+            return await db.RolePermissions
+                .Where(rp => rp.RoleId == roleId)
+                .Select(rp => new PermissionDto
+                {
+                    Id = rp.Permission.Id,
+                    ParentId = rp.Permission.ParentId,
+                    Name = rp.Permission.Name,
+                    Description = rp.Permission.Description
+                }).ToListAsync();
+        }
+
+
         public async Task<bool> AssignRoleAsync(Guid userId, Guid roleId)
         {
             var exists = await db.UserRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
             if (exists) return false;
-            db.UserRoles.Add(new UserRole { UserId = userId, RoleId = roleId, AssignedAt = DateTime.UtcNow });
+            db.UserRoles.Add(new UserRole { Id = Guid.NewGuid(), UserId = userId, RoleId = roleId, AssignedAt = DateTime.UtcNow });
             await db.SaveChangesAsync();
             return true;
         }
+
 
         public async Task<bool> RemoveRoleAsync(Guid userId, Guid roleId)
         {

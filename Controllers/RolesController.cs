@@ -63,5 +63,28 @@ namespace AttendVisionReportsApi.Controllers
             if (!removed) return BadRequest("Role not assigned.");
             return Ok();
         }
+
+        [HttpPost("assign-permission")]
+        public async Task<IActionResult> AssignPermission([FromBody] AssignPermissionDto dto)
+        {
+            var assigned = await _roleService.AssignPermissionAsync(dto.RoleId, dto.PermissionId);
+            if (!assigned) return BadRequest("Permission already assigned or invalid role/permission.");
+            return Ok();
+        }
+
+        [HttpPost("remove-permission")]
+        public async Task<IActionResult> RemovePermission([FromBody] AssignPermissionDto dto)
+        {
+            var removed = await _roleService.RemovePermissionAsync(dto.RoleId, dto.PermissionId);
+            if (!removed) return BadRequest("Permission not assigned.");
+            return Ok();
+        }
+
+        [HttpGet("{id}/permissions")]
+        public async Task<ActionResult<IEnumerable<PermissionDto>>> GetPermissions(Guid id)
+        {
+            var permissions = await _roleService.GetPermissionsAsync(id);
+            return Ok(permissions);
+        }
     }
 }
