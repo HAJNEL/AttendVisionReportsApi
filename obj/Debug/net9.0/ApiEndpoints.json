@@ -608,15 +608,15 @@
   },
   {
     "ContainingType": "AttendVisionReportsApi.Controllers.PermissionsController",
-    "Method": "AssignPermission",
+    "Method": "AssignPermissions",
     "RelativePath": "api/Permissions/assign",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "dto",
-        "Type": "AttendVisionReportsApi.DTOs.AssignPermissionDto",
+        "Name": "req",
+        "Type": "AttendVisionReportsApi.Controllers.PermissionsController\u002BAssignPermissionsRequest",
         "IsRequired": true
       }
     ],
@@ -1105,5 +1105,25 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AttendVisionReportsApi.Controllers.UserController",
+    "Method": "GetMyPermissions",
+    "RelativePath": "api/User/permissions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[AttendVisionReportsApi.DTOs.PermissionDto, AttendVisionReportsApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   }
 ]

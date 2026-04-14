@@ -9,7 +9,7 @@ namespace AttendVisionReportsApi.Services
         Task<PermissionDto> CreateAsync(CreatePermissionDto dto);
         Task<PermissionDto?> UpdateAsync(Guid id, UpdatePermissionDto dto);
         Task<bool> DeleteAsync(Guid id);
-        Task<bool> AssignPermissionAsync(Guid roleId, Guid permissionId);
+        Task<bool> AssignPermissionsAsync(Guid roleId, List<Guid> permissionIds);
         Task<bool> RemovePermissionAsync(Guid roleId, Guid permissionId);
         Task<IEnumerable<PermissionDto>> GetPermissionsByRoleAsync(Guid roleId);
     }

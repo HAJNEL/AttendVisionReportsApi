@@ -47,5 +47,16 @@ namespace AttendVisionReportsApi.Controllers
             if (!deleted) return NotFound();
             return NoContent();
         }
+
+        [HttpGet("permissions")]
+        public async Task<ActionResult<IEnumerable<PermissionDto>>> GetMyPermissions()
+        {
+            // Get user id from claims
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type.EndsWith("nameidentifier"));
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized();
+            var permissions = await _userService.GetPermissionsForUserAsync(userId);
+            return Ok(permissions);
+        }
     }
 }

@@ -88,11 +88,30 @@ namespace AttendVisionReportsApi.Services
             return true;
         }
 
-        public async Task<bool> AssignPermissionAsync(Guid roleId, Guid permissionId)
+
+        public async Task<bool> AssignPermissionsAsync(Guid roleId, List<Guid> permissionIds)
         {
-            var exists = await _db.RolePermissions.AnyAsync(rp => rp.RoleId == roleId && rp.PermissionId == permissionId);
-            if (exists) return false;
-            _db.RolePermissions.Add(new RolePermission { RoleId = roleId, PermissionId = permissionId });
+            // Get current permissions for the role
+            var current = await _db.RolePermissions
+                .Where(rp => rp.RoleId == roleId)
+                .ToListAsync();
+
+            var currentIds = current.Select(rp => rp.PermissionId).ToHashSet();
+            var newIds = permissionIds.ToHashSet();
+
+            // Permissions to remove
+            var toRemove = current.Where(rp => !newIds.Contains(rp.PermissionId)).ToList();
+            // Permissions to add
+            var toAdd = newIds.Except(currentIds).ToList();
+
+            if (!toRemove.Any() && !toAdd.Any())
+                return false; // No changes
+
+            if (toRemove.Any())
+                _db.RolePermissions.RemoveRange(toRemove);
+            foreach (var pid in toAdd)
+                _db.RolePermissions.Add(new RolePermission { RoleId = roleId, PermissionId = pid });
+
             await _db.SaveChangesAsync();
             return true;
         }

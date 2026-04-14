@@ -1,3 +1,4 @@
+
 using AttendVisionReportsApi.DTOs;
 using AttendVisionReportsApi.Models;
 using AttendVisionReportsApi.Data;
@@ -7,6 +8,35 @@ namespace AttendVisionReportsApi.Services
 {
     public class UserService(AppDbContext db) : IUserService
     {
+        public async Task<IEnumerable<PermissionDto>> GetPermissionsForUserAsync(Guid userId)
+        {
+            // Get all role ids for the user
+            var roleIds = await db.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Select(ur => ur.RoleId)
+                .ToListAsync();
+
+            // Get all permissions for those roles
+            var permissions = await db.RolePermissions
+                .Where(rp => roleIds.Contains(rp.RoleId))
+                .Include(rp => rp.Permission)
+                .Select(rp => new PermissionDto
+                {
+                    Id = rp.Permission.Id,
+                    ParentId = rp.Permission.ParentId,
+                    Name = rp.Permission.Name,
+                    Description = rp.Permission.Description,
+                    UniqueCode = rp.Permission.UniqueCode
+                })
+                .ToListAsync();
+
+            // Deduplicate by UniqueCode (case-insensitive) or Id
+            var unique = permissions
+                .GroupBy(p => string.IsNullOrEmpty(p.UniqueCode) ? p.Id.ToString() : p.UniqueCode.ToLower())
+                .Select(g => g.First())
+                .ToList();
+            return unique;
+        }
         public async Task<IEnumerable<UserDto>> GetAllAsync()
         {
             var users = await db.Users.ToListAsync();

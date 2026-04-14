@@ -48,11 +48,17 @@ namespace AttendVisionReportsApi.Controllers
             return NoContent();
         }
 
-        [HttpPost("assign")]
-        public async Task<IActionResult> AssignPermission([FromBody] AssignPermissionDto dto)
+        public class AssignPermissionsRequest
         {
-            var assigned = await _permissionService.AssignPermissionAsync(dto.RoleId, dto.PermissionId);
-            if (!assigned) return BadRequest("Permission already assigned or invalid role/permission.");
+            public Guid RoleId { get; set; }
+            public List<Guid> PermissionIds { get; set; } = new();
+        }
+
+        [HttpPost("assign")]
+        public async Task<IActionResult> AssignPermissions([FromBody] AssignPermissionsRequest req)
+        {
+            var assigned = await _permissionService.AssignPermissionsAsync(req.RoleId, req.PermissionIds);
+            if (!assigned) return BadRequest("No changes made or invalid input.");
             return Ok();
         }
 

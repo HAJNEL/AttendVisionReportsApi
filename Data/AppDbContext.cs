@@ -28,7 +28,7 @@
             // RolePermission PK is now Id (no composite key)
             modelBuilder.Entity<RolePermission>()
                 .HasOne(rp => rp.Role)
-                .WithMany()
+                .WithMany(r => r.RolePermissions)
                 .HasForeignKey(rp => rp.RoleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
