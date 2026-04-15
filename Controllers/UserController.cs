@@ -1,11 +1,14 @@
 using AttendVisionReportsApi.DTOs;
 using AttendVisionReportsApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AttendVisionReportsApi.Controllers
 {
+    // Protect all endpoints in this controller with JWT authentication
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -51,12 +54,16 @@ namespace AttendVisionReportsApi.Controllers
         [HttpGet("permissions")]
         public async Task<ActionResult<IEnumerable<PermissionDto>>> GetMyPermissions()
         {
-            // Get user id from claims
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type.EndsWith("nameidentifier"));
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            // Debug: log all claims for the current user
+            foreach (var claim in User.Claims)
+            {
+                System.Diagnostics.Debug.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
+            }
+
+            var result = await _userService.GetPermissionsForCurrentUserAsync(User);
+            if (result == null)
                 return Unauthorized();
-            var permissions = await _userService.GetPermissionsForUserAsync(userId);
-            return Ok(permissions);
+            return Ok(result);
         }
     }
 }

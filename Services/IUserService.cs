@@ -10,5 +10,6 @@ namespace AttendVisionReportsApi.Services
         Task<UserDto?> UpdateAsync(Guid id, UpdateUserDto dto);
         Task<bool> DeleteAsync(Guid id);
         Task<IEnumerable<PermissionDto>> GetPermissionsForUserAsync(Guid userId);
+        Task<IEnumerable<PermissionDto>?> GetPermissionsForCurrentUserAsync(System.Security.Claims.ClaimsPrincipal user);
     }
 }

@@ -11,19 +11,19 @@ namespace AttendVisionReportsApi.Controllers
         public Task<bool> UsersExist() => authService.UsersExistAsync();
 
         [HttpPost("register")]
-        public async Task<ActionResult<LoginResponse>> Register(RegisterRequest req)
+        public async Task<ActionResult<object>> Register(RegisterRequest req)
         {
-            var (response, error) = await authService.RegisterAsync(req);
+            var (response, error, token) = await authService.RegisterAsync(req);
             if (response is null) return BadRequest(error);
-            return Ok(response);
+            return Ok(new { token, user = response });
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponse>> Login(LoginRequest req)
+        public async Task<ActionResult<object>> Login(LoginRequest req)
         {
-            var (response, error) = await authService.LoginAsync(req);
+            var (response, error, token) = await authService.LoginAsync(req);
             if (response is null) return Unauthorized(error);
-            return Ok(response);
+            return Ok(new { token, user = response });
         }
     }
 }

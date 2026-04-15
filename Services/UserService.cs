@@ -6,8 +6,47 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AttendVisionReportsApi.Services
 {
-    public class UserService(AppDbContext db) : IUserService
-    {
+        public class UserService : IUserService
+        {
+            private readonly AppDbContext db;
+            public UserService(AppDbContext db)
+            {
+                this.db = db;
+            }
+
+            public async Task<IEnumerable<PermissionDto>?> GetPermissionsForCurrentUserAsync(System.Security.Claims.ClaimsPrincipal user)
+            {
+                // Debug: log all claims (set a breakpoint or log as needed)
+                var claims = user.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
+                // Example: System.Diagnostics.Debug.WriteLine(string.Join("; ", claims));
+
+                // Try common claim types for user id
+                var userIdClaim = user.Claims.FirstOrDefault(c =>
+                    c.Type == "sub" ||
+                    c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier" ||
+                    c.Type.EndsWith("nameidentifier"));
+
+                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                    return null;
+
+                var permissions = await (from u in db.Users
+                                         join ur in db.UserRoles on u.Id equals ur.UserId
+                                         join r in db.Roles on ur.RoleId equals r.Id
+                                         join rp in db.RolePermissions on r.Id equals rp.RoleId
+                                         join p in db.Permissions on rp.PermissionId equals p.Id
+                                         where u.Id == userId
+                                         select new PermissionDto
+                                         {
+                                             Id = p.Id,
+                                             ParentId = p.ParentId,
+                                             Name = p.Name,
+                                             Description = p.Description,
+                                             UniqueCode = p.UniqueCode
+                                         })
+                                         .Distinct()
+                                         .ToListAsync();
+                return permissions;
+            }
         public async Task<IEnumerable<PermissionDto>> GetPermissionsForUserAsync(Guid userId)
         {
             // Get all role ids for the user
