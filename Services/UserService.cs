@@ -135,13 +135,13 @@ namespace AttendVisionReportsApi.Services
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                Username = string.Concat(dto.FirstName, ".", dto.LastName),
+                Username = string.Concat(dto.FirstName.ToLower(), ".", dto.LastName.ToLower()),
                 Email = dto.Email,
-                PasswordHash = dto.Password,
-                FullName = string.Concat(dto.FirstName, dto.LastName),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                FullName = string.Concat(dto.FirstName, " ", dto.LastName),
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
-            };
+            };  
             db.Users.Add(user);
             await db.SaveChangesAsync();
 
@@ -163,7 +163,7 @@ namespace AttendVisionReportsApi.Services
             var user = await db.Users.FindAsync(id);
             if (user == null) return null;
             if (!string.IsNullOrEmpty(dto.Email)) user.Email = dto.Email;
-            if (!string.IsNullOrEmpty(dto.Password)) user.PasswordHash = dto.Password; // Hash in real app!
+            if (!string.IsNullOrEmpty(dto.Password)) user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             if (!string.IsNullOrEmpty(dto.FirstName) || !string.IsNullOrEmpty(dto.LastName)) user.FullName = string.Concat(dto.FirstName, " ", dto.LastName);
             if (!string.IsNullOrEmpty(dto.FirstName) || !string.IsNullOrEmpty(dto.LastName)) user.Username = string.Concat(dto.FirstName, ".", dto.LastName);
             if (dto.IsActive.HasValue) user.IsActive = dto.IsActive.Value;

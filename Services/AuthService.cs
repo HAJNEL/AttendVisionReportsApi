@@ -44,7 +44,17 @@ namespace AttendVisionReportsApi.Services
         public async Task<(LoginResponse? Response, string? Error, string? Token)> LoginAsync(LoginRequest req)
         {
             var user = await db.Users.FirstOrDefaultAsync(u => u.Username == req.Username);
-            if (user is null || !BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
+            if (user is null)
+                return (null, "Invalid username or password", null);
+
+            // Check if the hash is a valid BCrypt hash
+            if (string.IsNullOrWhiteSpace(user.PasswordHash) ||
+                !(user.PasswordHash.StartsWith("$2a$") || user.PasswordHash.StartsWith("$2b$") || user.PasswordHash.StartsWith("$2y$")))
+            {
+                return (null, "Your password needs to be reset due to a legacy or invalid password format.", null);
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
                 return (null, "Invalid username or password", null);
 
             if (!user.IsActive)
