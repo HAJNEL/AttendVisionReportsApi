@@ -1,4 +1,3 @@
-
 using AttendVisionReportsApi.DTOs;
 using AttendVisionReportsApi.Models;
 using AttendVisionReportsApi.Data;
@@ -89,8 +88,8 @@ namespace AttendVisionReportsApi.Services
             {
                 Id = u.Id,
                 Email = u.Email,
-                FirstName = u.Username.Contains(".") ? u.Username.Substring(0, u.Username.IndexOf(".")) : u.Username,
-                LastName = u.Username.Contains(".") ? u.Username.Substring(u.Username.IndexOf(".") + 1) : "",
+                FirstName = u.FirstName ?? string.Empty,
+                LastName = u.LastName ?? string.Empty,
                 IsActive = u.IsActive,
                 Roles = userRoles
                     .Where(ur => ur.UserId == u.Id)
@@ -123,8 +122,8 @@ namespace AttendVisionReportsApi.Services
             {
                 Id = user.Id,
                 Email = user.Email,
-                FirstName = user.Username.Contains(".") ? user.Username.Substring(0, user.Username.IndexOf(".")) : user.Username,
-                LastName = user.Username.Contains(".") ? user.Username.Substring(user.Username.IndexOf(".") + 1) : "",
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
                 IsActive = user.IsActive,
                 Roles = roles
             };
@@ -135,13 +134,16 @@ namespace AttendVisionReportsApi.Services
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                Username = string.Concat(dto.FirstName.ToLower(), ".", dto.LastName.ToLower()),
+                Username = (!string.IsNullOrWhiteSpace(dto.FirstName) && !string.IsNullOrWhiteSpace(dto.LastName))
+                    ? string.Concat(dto.FirstName.ToLower(), ".", dto.LastName.ToLower())
+                    : dto.Email,
                 Email = dto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                FullName = string.Concat(dto.FirstName, " ", dto.LastName),
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
-            };  
+            };
             db.Users.Add(user);
             await db.SaveChangesAsync();
 
@@ -164,8 +166,12 @@ namespace AttendVisionReportsApi.Services
             if (user == null) return null;
             if (!string.IsNullOrEmpty(dto.Email)) user.Email = dto.Email;
             if (!string.IsNullOrEmpty(dto.Password)) user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-            if (!string.IsNullOrEmpty(dto.FirstName) || !string.IsNullOrEmpty(dto.LastName)) user.FullName = string.Concat(dto.FirstName, " ", dto.LastName);
-            if (!string.IsNullOrEmpty(dto.FirstName) || !string.IsNullOrEmpty(dto.LastName)) user.Username = string.Concat(dto.FirstName, ".", dto.LastName);
+            if (!string.IsNullOrEmpty(dto.FirstName)) user.FirstName = dto.FirstName;
+            if (!string.IsNullOrEmpty(dto.LastName)) user.LastName = dto.LastName;
+            if (!string.IsNullOrEmpty(dto.FirstName) || !string.IsNullOrEmpty(dto.LastName))
+                user.Username = (!string.IsNullOrWhiteSpace(dto.FirstName) && !string.IsNullOrWhiteSpace(dto.LastName))
+                    ? string.Concat(dto.FirstName.ToLower(), ".", dto.LastName.ToLower())
+                    : user.Email;
             if (dto.IsActive.HasValue) user.IsActive = dto.IsActive.Value;
             await db.SaveChangesAsync();
 
@@ -192,6 +198,52 @@ namespace AttendVisionReportsApi.Services
             db.Users.Remove(user);
             await db.SaveChangesAsync();
             return true;
+        }
+
+            public async Task<IEnumerable<DepartmentResponse>> GetDepartmentsForUserAsync(Guid userId)
+        {
+            var departmentIds = await db.DepartmentUsers
+                .Where(du => du.UserId == userId)
+                .Select(du => du.DepartmentId)
+                .ToListAsync();
+            return await (from d in db.Departments
+                          where departmentIds.Contains(d.Id)
+                          join c in db.Companies on d.CompanyId equals c.Id into companyJoin
+                          from c in companyJoin.DefaultIfEmpty()
+                          orderby d.DepartmentName
+                          select new DepartmentResponse(
+                              d.Id,
+                              d.DepartmentName,
+                              d.Manager,
+                              (double?)d.PaymentRate,
+                              d.AddressLine1,
+                              d.AddressLine2,
+                              d.City,
+                              d.State,
+                              d.PostalCode,
+                              d.Country,
+                              d.SerialNo,
+                              d.CompanyId,
+                              c != null ? c.Name : null
+                          )).ToListAsync();
+        }
+
+        public async Task<IEnumerable<UserDto>> GetUsersForDepartmentAsync(Guid departmentId)
+        {
+            var userIds = await db.DepartmentUsers
+                .Where(du => du.DepartmentId == departmentId)
+                .Select(du => du.UserId)
+                .ToListAsync();
+            var users = await db.Users.Where(u => userIds.Contains(u.Id)).ToListAsync();
+            return users.Select(u => new UserDto
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.Username.Contains(".") ? u.Username.Substring(0, u.Username.IndexOf(".")) : u.Username,
+                LastName = u.Username.Contains(".") ? u.Username.Substring(u.Username.IndexOf(".") + 1) : "",
+                IsActive = u.IsActive,
+                Roles = new List<RoleDto>() // Optionally populate roles if needed
+            });
         }
     }
 }

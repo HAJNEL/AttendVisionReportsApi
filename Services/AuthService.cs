@@ -28,12 +28,20 @@ namespace AttendVisionReportsApi.Services
             if (await db.Users.AnyAsync())
                 return (null, "Registration is disabled. Users already exist.", null);
 
+            string? firstName = null, lastName = null;
+            if (!string.IsNullOrWhiteSpace(req.FullName))
+            {
+                var parts = req.FullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                firstName = parts.Length > 0 ? parts[0] : null;
+                lastName = parts.Length > 1 ? parts[1] : null;
+            }
             var user = new User
             {
                 Username = req.Username,
                 Email = req.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
-                FullName = req.FullName
+                FirstName = firstName,
+                LastName = lastName
             };
             db.Users.Add(user);
             await db.SaveChangesAsync();
@@ -67,7 +75,7 @@ namespace AttendVisionReportsApi.Services
         }
 
         private static LoginResponse Map(User u) =>
-            new(u.Id, u.Username, u.Email, u.FullName);
+            new(u.Id, u.Username, u.Email, string.Join(" ", new[]{u.FirstName, u.LastName}.Where(x => !string.IsNullOrWhiteSpace(x))));
 
         private string GenerateJwtToken(User user)
         {

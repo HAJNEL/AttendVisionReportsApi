@@ -7,7 +7,11 @@ namespace AttendVisionReportsApi.Controllers
     [ApiController, Route("api/departments")]
     public class DepartmentsController(IDepartmentsService departmentsService) : ControllerBase
     {
+
         [HttpGet]
+        public Task<List<DepartmentResponse>> GetAllForUser() => departmentsService.GetAllForUserAsync(User);
+
+        [HttpGet("all")]
         public Task<List<DepartmentResponse>> GetAll() => departmentsService.GetAllAsync();
 
         [HttpPost]
@@ -17,8 +21,9 @@ namespace AttendVisionReportsApi.Controllers
             return CreatedAtAction(nameof(GetAll), dept);
         }
 
+
         [HttpPut("{id}")]
-        public async Task<ActionResult<DepartmentResponse>> Update(int id, DepartmentInput input)
+        public async Task<ActionResult<DepartmentResponse>> Update(Guid id, DepartmentInput input)
         {
             var dept = await departmentsService.UpdateAsync(id, input);
             if (dept is null) return NotFound();
@@ -26,7 +31,7 @@ namespace AttendVisionReportsApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             if (!await departmentsService.DeleteAsync(id)) return NotFound();
             return NoContent();

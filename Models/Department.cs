@@ -5,7 +5,7 @@
     [Table("departments")]
     public class Department
     {
-        [Column("id")] public int Id { get; set; }
+        [Column("id")] public Guid Id { get; set; }
         [Column("department_name")] public string DepartmentName { get; set; } = "";
         [Column("manager")] public string? Manager { get; set; }
         [Column("payment_rate")] public decimal? PaymentRate { get; set; }

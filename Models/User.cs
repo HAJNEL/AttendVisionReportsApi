@@ -9,7 +9,8 @@
         [Column("username")] public string Username { get; set; } = "";
         [Column("email")] public string Email { get; set; } = "";
         [Column("password_hash")] public string PasswordHash { get; set; } = "";
-        [Column("full_name")] public string? FullName { get; set; }
+        [Column("first_name")] public string? FirstName { get; set; }
+        [Column("last_name")] public string? LastName { get; set; }
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
         [Column("last_login_at")]

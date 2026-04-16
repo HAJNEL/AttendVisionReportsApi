@@ -11,5 +11,8 @@ namespace AttendVisionReportsApi.Services
         Task<bool> DeleteAsync(Guid id);
         Task<IEnumerable<PermissionDto>> GetPermissionsForUserAsync(Guid userId);
         Task<IEnumerable<PermissionDto>?> GetPermissionsForCurrentUserAsync(System.Security.Claims.ClaimsPrincipal user);
+
+        Task<IEnumerable<DepartmentResponse>> GetDepartmentsForUserAsync(Guid userId);
+        Task<IEnumerable<UserDto>> GetUsersForDepartmentAsync(Guid departmentId);
     }
 }

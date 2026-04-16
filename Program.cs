@@ -48,6 +48,8 @@ public partial class Program
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IRoleService, RoleService>();
 
+        builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+
         // CORS allow the Angular dev server
         builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
             p.WithOrigins("http://localhost:4200")

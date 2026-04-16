@@ -7,6 +7,7 @@ namespace AttendVisionReportsApi.Services
 {
     public class DepartmentsService(AppDbContext db) : IDepartmentsService
     {
+
         public Task<List<DepartmentResponse>> GetAllAsync() =>
             (from d in db.Departments
              join c in db.Companies on d.CompanyId equals c.Id into companyJoin
@@ -28,6 +29,43 @@ namespace AttendVisionReportsApi.Services
                  c != null ? c.Name : null
              )).ToListAsync();
 
+        // Overload: filter by current user
+        public async Task<List<DepartmentResponse>> GetAllForUserAsync(System.Security.Claims.ClaimsPrincipal user)
+        {
+            var userIdClaim = user.Claims.FirstOrDefault(c =>
+                c.Type == "sub" ||
+                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier" ||
+                c.Type.EndsWith("nameidentifier"));
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return new List<DepartmentResponse>();
+
+            var departmentIds = await db.DepartmentUsers
+                .Where(du => du.UserId == userId)
+                .Select(du => du.DepartmentId)
+                .ToListAsync();
+
+            return await (from d in db.Departments
+                          where departmentIds.Contains(d.Id)
+                          join c in db.Companies on d.CompanyId equals c.Id into companyJoin
+                          from c in companyJoin.DefaultIfEmpty()
+                          orderby d.DepartmentName
+                          select new DepartmentResponse(
+                              d.Id,
+                              d.DepartmentName,
+                              d.Manager,
+                              (double?)d.PaymentRate,
+                              d.AddressLine1,
+                              d.AddressLine2,
+                              d.City,
+                              d.State,
+                              d.PostalCode,
+                              d.Country,
+                              d.SerialNo,
+                              d.CompanyId,
+                              c != null ? c.Name : null
+                          )).ToListAsync();
+        }
+
 
         public async Task<DepartmentResponse> CreateAsync(DepartmentInput input)
         {
@@ -39,7 +77,7 @@ namespace AttendVisionReportsApi.Services
         }
 
 
-        public async Task<DepartmentResponse?> UpdateAsync(int id, DepartmentInput input)
+        public async Task<DepartmentResponse?> UpdateAsync(Guid id, DepartmentInput input)
         {
             var dept = await db.Departments.FindAsync(id);
             if (dept is null) return null;
@@ -49,7 +87,7 @@ namespace AttendVisionReportsApi.Services
             return Map(dept, companyName);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var dept = await db.Departments.FindAsync(id);
             if (dept is null) return false;

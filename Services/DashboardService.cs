@@ -4,211 +4,354 @@ using Npgsql;
 
 namespace AttendVisionReportsApi.Services
 {
-    public class DashboardService(NpgsqlDataSource dataSource) : IDashboardService
-    {
+      using AttendVisionReportsApi.Data;
+      using AttendVisionReportsApi.Models;
+      using Microsoft.EntityFrameworkCore;
+      public class DashboardService : IDashboardService
+      {
+        private readonly AppDbContext db;
+        public DashboardService(AppDbContext db)
+        {
+          this.db = db;
+        }
 
         public async Task<DashboardKpisResponse> GetKpisAsync(string dateFrom, string dateTo, string? department, string? employee)
+          => await GetKpisAsync(dateFrom, dateTo, department, employee, null);
+
+        public async Task<DashboardKpisResponse> GetKpisAsync(string dateFrom, string dateTo, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-            using var conn = dataSource.CreateConnection();
-            var p = new { dateFrom, dateTo, dept = department, emp = employee };
+          var dateFromVal = DateOnly.Parse(dateFrom);
+          var dateToVal = DateOnly.Parse(dateTo);
+          var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+          var dateToFinal = dateToVal < today ? dateToVal : today;
 
-            var total = await conn.QuerySingleAsync<long>(
-                "SELECT COUNT(DISTINCT employee_id) FROM access_records " +
-                "WHERE employee_id IS NOT NULL " +
-                "AND access_date BETWEEN @dateFrom::date AND LEAST(@dateTo::date, CURRENT_DATE) " +
-                "AND (@dept::text IS NULL OR department = @dept) " +
-                "AND (@emp::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @emp)", p);
 
-            var checkins = await conn.QuerySingleAsync<long>(
-                "SELECT COUNT(DISTINCT employee_id) FROM access_records " +
-                "WHERE access_date BETWEEN @dateFrom::date AND LEAST(@dateTo::date, CURRENT_DATE) " +
-                "AND attendance_status = 'check_in' AND employee_id IS NOT NULL " +
-                "AND (@dept::text IS NULL OR department = @dept) " +
-                "AND (@emp::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @emp)", p);
+          var query = db.AccessRecords.AsQueryable();
+          query = query.Where(x => x.AccessDate >= dateFromVal && x.AccessDate <= dateToFinal);
+          var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+          if (allowedDepartments != null)
+            query = query.Where(x => allowedDepartments.Contains(x.Department));
+          if (!string.IsNullOrEmpty(employee))
+            query = query.Where(x => (x.PersonName != null && x.PersonName.Trim() != "") ? x.PersonName == employee : x.EmployeeId == employee);
 
-            var onSite = await conn.QuerySingleAsync<long>(
-                "WITH per_employee AS (" +
-                "  SELECT employee_id," +
-                "    MAX(CASE WHEN attendance_status = 'check_in'  THEN 1 ELSE 0 END) AS has_checkin," +
-                "    MAX(CASE WHEN attendance_status = 'check_out' THEN 1 ELSE 0 END) AS has_checkout" +
-                "  FROM access_records" +
-                "  WHERE access_date = LEAST(@dateTo::date, CURRENT_DATE)" +
-                "    AND employee_id IS NOT NULL" +
-                "    AND (@dept::text IS NULL OR department = @dept)" +
-                "    AND (@emp::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @emp)" +
-                "  GROUP BY employee_id" +
-                ") SELECT COUNT(*) FROM per_employee WHERE has_checkin = 1 AND has_checkout = 0",
-                new { dateTo, dept = department, emp = employee });
+          var total = await query.Where(x => x.EmployeeId != null).Select(x => x.EmployeeId).Distinct().CountAsync();
 
-            var failed = await conn.QuerySingleAsync<long>(
-                "SELECT COUNT(*) FROM access_records " +
-                "WHERE access_date BETWEEN @dateFrom::date AND LEAST(@dateTo::date, CURRENT_DATE) " +
-                "AND attendance_status = '' " +
-                "AND (@dept::text IS NULL OR department = @dept) " +
-                "AND (@emp::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @emp)", p);
+          var checkins = await query.Where(x => x.AttendanceStatus == "check_in" && x.EmployeeId != null)
+            .Select(x => x.EmployeeId).Distinct().CountAsync();
 
-            return new DashboardKpisResponse(total, checkins, onSite, failed);
+          // OnSite: employees who checked in but not checked out on dateToFinal
+
+          var onSiteQuery = db.AccessRecords.AsQueryable();
+          onSiteQuery = onSiteQuery.Where(x => x.AccessDate == dateToFinal && x.EmployeeId != null);
+          if (allowedDepartments != null)
+            onSiteQuery = onSiteQuery.Where(x => allowedDepartments.Contains(x.Department));
+          if (!string.IsNullOrEmpty(employee))
+            onSiteQuery = onSiteQuery.Where(x => (x.PersonName != null && x.PersonName.Trim() != "") ? x.PersonName == employee : x.EmployeeId == employee);
+
+          var onSite = await onSiteQuery
+            .GroupBy(x => x.EmployeeId)
+            .Select(g => new
+            {
+              HasCheckin = g.Any(r => r.AttendanceStatus == "check_in"),
+              HasCheckout = g.Any(r => r.AttendanceStatus == "check_out")
+            })
+            .CountAsync(x => x.HasCheckin && !x.HasCheckout);
+
+          var failed = await query.Where(x => x.AttendanceStatus == "").CountAsync();
+
+          return new DashboardKpisResponse(total, checkins, onSite, failed);
         }
 
         public async Task<IEnumerable<dynamic>> GetHourlyTrafficAsync(string date, string? department)
+          => await GetHourlyTrafficAsync(date, department, null);
+
+        public async Task<IEnumerable<dynamic>> GetHourlyTrafficAsync(string date, string? department, System.Security.Claims.ClaimsPrincipal? user)
         {
-            using var conn = dataSource.CreateConnection();
-            return await conn.QueryAsync<dynamic>(
-                "SELECT TO_CHAR(date_trunc('minute', access_time), 'HH24:MI') AS label," +
-                "       COUNT(*)::bigint AS count," +
-                "       STRING_AGG(COALESCE(NULLIF(TRIM(person_name), ''), employee_id, 'Unknown'), ', ' ORDER BY access_time) AS names " +
-                "FROM access_records " +
-                "WHERE access_date = @date::date AND (@dept::text IS NULL OR department = @dept) " +
-                "GROUP BY date_trunc('minute', access_time) ORDER BY date_trunc('minute', access_time)",
-                new { date, dept = department });
+          var dateVal = DateOnly.Parse(date);
+
+          var query = db.AccessRecords.AsQueryable();
+          query = query.Where(x => x.AccessDate == dateVal);
+          var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+          if (allowedDepartments != null)
+            query = query.Where(x => allowedDepartments.Contains(x.Department));
+
+          var result = await query
+            .GroupBy(x => x.AccessTime)
+            .OrderBy(g => g.Key)
+            .Select(g => new
+            {
+              label = g.Key.ToString("HH:mm"),
+              count = g.Count(),
+              names = string.Join(", ", g.OrderBy(x => x.AccessTime)
+                .Select(x => !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown")))
+            })
+            .ToListAsync();
+          return result;
         }
 
         public async Task<IEnumerable<dynamic>> GetMonthlyAttendanceAsync(string? department, string? employee)
+          => await GetMonthlyAttendanceAsync(department, employee, null);
+
+        public async Task<IEnumerable<dynamic>> GetMonthlyAttendanceAsync(string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-            using var conn = dataSource.CreateConnection();
-            return await conn.QueryAsync<dynamic>(
-                "SELECT access_date::text AS label, COUNT(DISTINCT employee_id)::bigint AS count " +
-                "FROM access_records " +
-                "WHERE access_date >= date_trunc('month', CURRENT_DATE)::date " +
-                "  AND employee_id IS NOT NULL AND (@dept::text IS NULL OR department = @dept) " +
-                "  AND (@emp::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @emp) " +
-                "GROUP BY access_date ORDER BY access_date",
-                new { dept = department, emp = employee });
+          var monthStart = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+
+          var query = db.AccessRecords.AsQueryable();
+          query = query.Where(x => x.AccessDate >= monthStart && x.EmployeeId != null);
+          var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+          if (allowedDepartments != null)
+            query = query.Where(x => allowedDepartments.Contains(x.Department));
+          if (!string.IsNullOrEmpty(employee))
+            query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+
+          var result = await query
+            .GroupBy(x => x.AccessDate)
+            .OrderBy(g => g.Key)
+            .Select(g => new {
+              label = g.Key.ToString(),
+              count = g.Select(x => x.EmployeeId).Distinct().Count()
+            })
+            .ToListAsync();
+          return result;
         }
 
         public async Task<IEnumerable<dynamic>> GetDeptBreakdownAsync(string? department)
+          => await GetDeptBreakdownAsync(department, null);
+
+        public async Task<IEnumerable<dynamic>> GetDeptBreakdownAsync(string? department, System.Security.Claims.ClaimsPrincipal? user)
         {
-            using var conn = dataSource.CreateConnection();
-            return await conn.QueryAsync<dynamic>(
-                "SELECT COALESCE(department, 'Unknown') AS label, COUNT(DISTINCT employee_id)::bigint AS count " +
-                "FROM access_records " +
-                "WHERE access_date = CURRENT_DATE AND check_in = true " +
-                "AND (@dept::text IS NULL OR department = @dept) " +
-                "GROUP BY department ORDER BY count DESC LIMIT 10",
-                new { dept = department });
+
+          var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+          var query = db.AccessRecords.AsQueryable();
+          query = query.Where(x => x.AccessDate == today && x.AttendanceStatus == "check_in" && x.EmployeeId != null);
+          var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+          if (allowedDepartments != null)
+            query = query.Where(x => allowedDepartments.Contains(x.Department));
+
+          var result = await query
+            .GroupBy(x => x.Department)
+            .Select(g => new {
+              label = g.Key ?? "Unknown",
+              count = g.Select(x => x.EmployeeId).Distinct().Count()
+            })
+            .OrderByDescending(x => x.count)
+            .Take(10)
+            .ToListAsync();
+          return result;
         }
 
         public async Task<IEnumerable<dynamic>> GetMonthlyTrafficAsync(int year, int month, string? department, string? employee)
+          => await GetMonthlyTrafficAsync(year, month, department, employee, null);
+
+        public async Task<IEnumerable<dynamic>> GetMonthlyTrafficAsync(int year, int month, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-            var dateStart = $"{year}-{month:D2}-01";
-            using var conn = dataSource.CreateConnection();
-            return await conn.QueryAsync<dynamic>(
-                "SELECT access_date::text AS label, COUNT(*)::bigint AS count " +
-                "FROM access_records " +
-                "WHERE access_date >= @dateStart::date AND access_date < (@dateStart::date + INTERVAL '1 month') " +
-                "AND (@dept::text IS NULL OR department = @dept) " +
-                "AND (@emp::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @emp) " +
-                "GROUP BY access_date ORDER BY access_date",
-                new { dateStart, dept = department, emp = employee });
+          var dateStart = new DateOnly(year, month, 1);
+          var dateEnd = dateStart.AddMonths(1);
+
+          var query = db.AccessRecords.AsQueryable();
+          query = query.Where(x => x.AccessDate >= dateStart && x.AccessDate < dateEnd);
+          var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+          if (allowedDepartments != null)
+            query = query.Where(x => allowedDepartments.Contains(x.Department));
+          if (!string.IsNullOrEmpty(employee))
+            query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+
+          var result = await query
+            .GroupBy(x => x.AccessDate)
+            .OrderBy(g => g.Key)
+            .Select(g => new {
+              label = g.Key.ToString(),
+              count = g.Count()
+            })
+            .ToListAsync();
+          return result;
         }
 
         public async Task<IEnumerable<dynamic>> GetYearlyTrafficAsync(int year, string? department, string? employee)
+          => await GetYearlyTrafficAsync(year, department, employee, null);
+
+        public async Task<IEnumerable<dynamic>> GetYearlyTrafficAsync(int year, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-            var dateStart = $"{year}-01-01";
-            using var conn = dataSource.CreateConnection();
-            return await conn.QueryAsync<dynamic>(
-                "SELECT TO_CHAR(access_date, 'YYYY-MM') AS label, COUNT(*)::bigint AS count " +
-                "FROM access_records " +
-                "WHERE access_date >= @dateStart::date AND access_date < (@dateStart::date + INTERVAL '1 year') " +
-                "AND (@dept::text IS NULL OR department = @dept) " +
-                "AND (@emp::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @emp) " +
-                "GROUP BY label ORDER BY label",
-                new { dateStart, dept = department, emp = employee });
+          var dateStart = new DateOnly(year, 1, 1);
+          var dateEnd = dateStart.AddYears(1);
+
+          var query = db.AccessRecords.AsQueryable();
+          query = query.Where(x => x.AccessDate >= dateStart && x.AccessDate < dateEnd);
+          var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+          if (allowedDepartments != null)
+            query = query.Where(x => allowedDepartments.Contains(x.Department));
+          if (!string.IsNullOrEmpty(employee))
+            query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+
+          var result = await query
+            .GroupBy(x => new { x.AccessDate.Year, x.AccessDate.Month })
+            .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+            .Select(g => new {
+              label = g.Key.Year.ToString("D4") + "-" + g.Key.Month.ToString("D2"),
+              count = g.Count()
+            })
+            .ToListAsync();
+          return result;
         }
 
         public async Task<IEnumerable<dynamic>> GetDayEventsAsync(string date, string? department, string? employee)
+          => await GetDayEventsAsync(date, department, employee, null);
+
+        public async Task<IEnumerable<dynamic>> GetDayEventsAsync(string date, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-            using var conn = dataSource.CreateConnection();
-            return await conn.QueryAsync<dynamic>(@"
-SELECT
-  TO_CHAR(
-    date_trunc('hour', access_time) +
-    (EXTRACT(MINUTE FROM access_time)::int / 15) * INTERVAL '15 minutes',
-    'HH24:MI'
-  ) AS label,
-  COALESCE(attendance_status, 'unknown') AS status,
-  COUNT(*)::bigint AS count,
-  STRING_AGG(COALESCE(NULLIF(TRIM(person_name), ''), employee_id, 'Unknown'), ', ' ORDER BY access_time) AS names
-FROM access_records
-WHERE access_date = @date::date
-  AND (@dept::text IS NULL OR department = @dept)
-  AND (@emp::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @emp)
-GROUP BY 1, 2 ORDER BY 1, 2",
-                new { date, dept = department, emp = employee });
+          var dateVal = DateOnly.Parse(date);
+
+          var query = db.AccessRecords.AsQueryable();
+          query = query.Where(x => x.AccessDate == dateVal);
+          var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+          if (allowedDepartments != null)
+            query = query.Where(x => allowedDepartments.Contains(x.Department));
+          if (!string.IsNullOrEmpty(employee))
+            query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+
+          // Group by 15-minute intervals and attendance_status
+          var records = await query.ToListAsync();
+          var result = records
+            .GroupBy(x => new {
+              label = new TimeSpan(x.AccessTime.Hour, (x.AccessTime.Minute / 15) * 15, 0).ToString(@"hh\:mm"),
+              status = string.IsNullOrWhiteSpace(x.AttendanceStatus) ? "unknown" : x.AttendanceStatus
+            })
+            .OrderBy(g => g.Key.label).ThenBy(g => g.Key.status)
+            .Select(g => new {
+              label = g.Key.label,
+              status = g.Key.status,
+              count = g.Count(),
+              names = string.Join(", ", g.OrderBy(x => x.AccessTime)
+                .Select(x => !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown")))
+            })
+            .ToList();
+          return result;
         }
 
         public async Task<IEnumerable<DayPersonRowResponse>> GetDayPeopleAsync(string date, string? department, string? employee)
+          => await GetDayPeopleAsync(date, department, employee, null);
+
+        public async Task<IEnumerable<DayPersonRowResponse>> GetDayPeopleAsync(string date, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-            using var conn = dataSource.CreateConnection();
-            var sql = @"
-WITH all_records AS (
-  SELECT COALESCE(NULLIF(TRIM(person_name), ''), employee_id, 'Unknown') AS person,
-    COALESCE(department, 'Unknown') AS department,
-    access_datetime, access_time, attendance_status
-  FROM access_records
-  WHERE access_date = @date::date AND (@dept::text IS NULL OR department = @dept)
-    AND (@emp::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @emp)
-),
-deduped AS (
-  SELECT *, LAG(attendance_status) OVER (PARTITION BY person ORDER BY access_datetime) AS prev_status
-  FROM all_records
-),
-first_breaks AS (
-  SELECT person, access_datetime FROM deduped
-  WHERE attendance_status = 'break_out' AND (prev_status IS NULL OR prev_status != 'break_out')
-),
-break_durations AS (
-  SELECT fb.person, fb.access_datetime AS break_start,
-    (SELECT MIN(ar.access_datetime) FROM all_records ar
-     WHERE ar.person = fb.person AND ar.attendance_status = 'break_in' AND ar.access_datetime > fb.access_datetime) AS break_end
-  FROM first_breaks fb
-),
-break_totals AS (
-  SELECT person,
-    COALESCE(SUM(CASE WHEN break_end IS NOT NULL
-      THEN EXTRACT(EPOCH FROM (break_end - break_start)) / 3600.0
-      ELSE 0 END), 0)::float8 AS hours_break
-  FROM break_durations GROUP BY person
-),
-day_summary AS (
-  SELECT person, department, COUNT(*)::bigint AS event_count,
-    COALESCE(MIN(TO_CHAR(access_time, 'HH24:MI')), '')::text AS first_time,
-    COALESCE(MAX(TO_CHAR(access_time, 'HH24:MI')), '')::text AS last_time,
-    (ARRAY_AGG(COALESCE(attendance_status, 'unknown') ORDER BY access_datetime DESC))[1] AS last_status,
-    COALESCE(EXTRACT(EPOCH FROM (
-      MAX(CASE WHEN attendance_status = 'check_out' THEN access_datetime END) -
-      MIN(CASE WHEN attendance_status = 'check_in'  THEN access_datetime END)
-    )) / 3600.0, 0)::float8 AS gross_hours
-  FROM all_records GROUP BY person, department
-)
-SELECT
-  ds.person,
-  ds.department,
-  ds.event_count,
-  ds.first_time,
-  ds.last_time,
-  ds.last_status,
-  COALESCE(bt.hours_break, 0)::float8 AS hours_break,
-  TO_CHAR((COALESCE(bt.hours_break, 0) * INTERVAL '1 hour'), 'HH24:MI') AS break_time,
-  GREATEST(ds.gross_hours - COALESCE(bt.hours_break, 0), 0)::float8 AS hours_worked,
-  TO_CHAR((GREATEST(ds.gross_hours - COALESCE(bt.hours_break, 0), 0) * INTERVAL '1 hour'), 'HH24:MI') AS worked_time
-FROM day_summary ds
-LEFT JOIN break_totals bt ON ds.person = bt.person
-ORDER BY ds.event_count DESC, ds.person";
-            var results = await conn.QueryAsync<DayPersonRowResponse>(sql, new { date, dept = department, emp = employee });
-            return results;
+            var dateVal = DateOnly.Parse(date);
+
+            var query = db.AccessRecords.AsQueryable();
+            query = query.Where(x => x.AccessDate == dateVal);
+            var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+            if (allowedDepartments != null)
+              query = query.Where(x => allowedDepartments.Contains(x.Department));
+            if (!string.IsNullOrEmpty(employee))
+              query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+
+            var records = await query
+              .Select(x => new {
+                Person = !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown"),
+                Department = x.Department ?? "Unknown",
+                AccessDatetime = x.AccessDatetime,
+                AccessTime = x.AccessTime,
+                AttendanceStatus = string.IsNullOrWhiteSpace(x.AttendanceStatus) ? "unknown" : x.AttendanceStatus
+              })
+              .OrderBy(x => x.Person).ThenBy(x => x.AccessDatetime)
+              .ToListAsync();
+
+            var grouped = records.GroupBy(x => new { x.Person, x.Department });
+            var result = new List<DayPersonRowResponse>();
+            foreach (var group in grouped)
+            {
+                var events = group.ToList();
+                var eventCount = events.Count;
+                var firstTime = events.Min(e => e.AccessTime).ToString("HH:mm");
+                var lastTime = events.Max(e => e.AccessTime).ToString("HH:mm");
+                var lastStatus = events.OrderByDescending(e => e.AccessDatetime).FirstOrDefault()?.AttendanceStatus ?? "unknown";
+
+                // Calculate gross hours (check_in to check_out)
+                var firstCheckIn = events.Where(e => e.AttendanceStatus == "check_in").OrderBy(e => e.AccessDatetime).FirstOrDefault();
+                var lastCheckOut = events.Where(e => e.AttendanceStatus == "check_out").OrderByDescending(e => e.AccessDatetime).FirstOrDefault();
+                double grossHours = 0;
+                if (firstCheckIn != null && lastCheckOut != null && lastCheckOut.AccessDatetime > firstCheckIn.AccessDatetime)
+                {
+                  grossHours = (lastCheckOut.AccessDatetime - firstCheckIn.AccessDatetime).TotalHours;
+                }
+
+                // Calculate break durations
+                double hoursBreak = 0;
+                var prevStatus = "";
+                DateTime? breakStart = null;
+                foreach (var e in events)
+                {
+                  if (e.AttendanceStatus == "break_out" && prevStatus != "break_out")
+                  {
+                    breakStart = e.AccessDatetime;
+                  }
+                  else if (e.AttendanceStatus == "break_in" && breakStart != null)
+                  {
+                    hoursBreak += (e.AccessDatetime - breakStart.Value).TotalHours;
+                    breakStart = null;
+                  }
+                  prevStatus = e.AttendanceStatus;
+                }
+
+                // Compose response
+                var hoursWorked = Math.Max(grossHours - hoursBreak, 0);
+                result.Add(new DayPersonRowResponse
+                {
+                  person = group.Key.Person,
+                  department = group.Key.Department,
+                  event_count = eventCount,
+                  first_time = firstTime,
+                  last_time = lastTime,
+                  last_status = lastStatus,
+                  hours_break = hoursBreak,
+                  break_time = TimeSpan.FromHours(hoursBreak).ToString(@"hh\:mm"),
+                  hours_worked = hoursWorked,
+                  worked_time = TimeSpan.FromHours(hoursWorked).ToString(@"hh\:mm")
+                });
+            }
+            return result.OrderByDescending(x => x.event_count).ThenBy(x => x.person).ToList();
         }
 
         public async Task<IEnumerable<string>> GetEmployeesAsync(string? department)
+          => await GetEmployeesAsync(department, null);
+
+        public async Task<IEnumerable<string>> GetEmployeesAsync(string? department, System.Security.Claims.ClaimsPrincipal? user)
         {
-            using var conn = dataSource.CreateConnection();
-            return await conn.QueryAsync<string>(
-                "SELECT DISTINCT COALESCE(NULLIF(TRIM(person_name), ''), employee_id, 'Unknown') AS name " +
-                "FROM access_records " +
-                "WHERE (@dept::text IS NULL OR department = @dept) " +
-                "  AND person_name IS NOT NULL AND TRIM(person_name) <> '' " +
-                "ORDER BY name",
-                new { dept = department });
+            var query = db.AccessRecords.AsQueryable();
+            var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+            if (allowedDepartments != null)
+                query = query.Where(x => allowedDepartments.Contains(x.Department));
+            query = query.Where(x => x.PersonName != null && x.PersonName.Trim() != "");
+            var result = await query
+                .Select(x => !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown"))
+                .Distinct()
+                .OrderBy(x => x)
+                .ToListAsync<string>();
+            return result;
+        }
+
+        // Helper: get allowed departments for user
+        private async Task<List<string>?> GetAllowedDepartmentsAsync(System.Security.Claims.ClaimsPrincipal? user, string? department)
+        {
+            if (!string.IsNullOrEmpty(department))
+                return new List<string> { department };
+            if (user == null)
+                return null;
+            var userIdClaim = user.Claims.FirstOrDefault(c =>
+                c.Type == "sub" ||
+                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier" ||
+                c.Type.EndsWith("nameidentifier"));
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return null;
+            var departmentIds = await db.DepartmentUsers
+                .Where(du => du.UserId == userId)
+                .Select(du => du.DepartmentId)
+                .ToListAsync();
+            if (!departmentIds.Any())
+                return new List<string>();
+            var departmentNames = await db.Departments
+                .Where(d => departmentIds.Contains(d.Id))
+                .Select(d => d.DepartmentName)
+                .ToListAsync();
+            return departmentNames;
         }
     }
 }
