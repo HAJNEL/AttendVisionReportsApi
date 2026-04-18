@@ -11,14 +11,19 @@ public partial class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.Configuration.AddEnvironmentVariables();
 
         // Database
-        var connectionString = builder.Configuration.GetConnectionString("Default")!;
-        builder.Services.AddNpgsqlDataSource(connectionString);
-        builder.Services.AddDbContext<AppDbContext>(opt => opt.UseNpgsql(connectionString));
+        var connectionString = builder.Configuration.GetConnectionString("Default") ?? "";
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            builder.Services.AddNpgsqlDataSource(connectionString);
+            builder.Services.AddDbContext<AppDbContext>(opt => opt.UseNpgsql(connectionString));
+        }
 
         // JWT Authentication
-        var jwtKey = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
+        var jwtKeyString = builder.Configuration["Jwt:Key"] ?? "a-very-long-and-secure-default-key-for-development-purposes";
+        var jwtKey = Encoding.UTF8.GetBytes(jwtKeyString);
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opt =>
             {
@@ -50,20 +55,55 @@ public partial class Program
 
         builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
 
-        // CORS allow the Angular dev server
-        builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
-            p.WithOrigins("http://localhost:4200")
-             .AllowAnyHeader()
-             .AllowAnyMethod()));
+        // Health Check Service
+        builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
+
+        // CORS Policy Configuration
+        var allowedOriginsString = builder.Configuration["CorsSettings:AllowedOrigins"];
+        var allowedOrigins = (allowedOriginsString ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("CorsPolicy", policy =>
+            {
+                if (allowedOrigins.Length > 0)
+                {
+                    policy.WithOrigins(allowedOrigins)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                }
+                else
+                {
+                    // Fallback to allow any origin for debugging if none are specified in config
+                    policy.SetIsOriginAllowed(_ => true)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                }
+
+                var maxAge = builder.Configuration.GetValue<int>("CorsSettings:PreflightMaxAge");
+                if (maxAge > 0)
+                {
+                    policy.SetPreflightMaxAge(TimeSpan.FromSeconds(maxAge));
+                }
+            });
+        });
 
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
             app.MapOpenApi();
 
-        app.UseCors();
+        app.UseHttpsRedirection();
+        app.UseRouting();
+
+        // CORS must run between UseRouting and UseEndpoints, and before authentication/authorization
+        app.UseCors("CorsPolicy");
+
         app.UseAuthentication();
         app.UseAuthorization();
+
         app.MapControllers();
         app.Run();
     }
