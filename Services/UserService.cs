@@ -91,6 +91,7 @@ namespace AttendVisionReportsApi.Services
                 FirstName = u.FirstName ?? string.Empty,
                 LastName = u.LastName ?? string.Empty,
                 IsActive = u.IsActive,
+                ResetPassword = u.ResetPassword,
                 Roles = userRoles
                     .Where(ur => ur.UserId == u.Id)
                     .Select(ur => new RoleDto
@@ -125,6 +126,7 @@ namespace AttendVisionReportsApi.Services
                 FirstName = user.FirstName ?? string.Empty,
                 LastName = user.LastName ?? string.Empty,
                 IsActive = user.IsActive,
+                ResetPassword = user.ResetPassword,
                 Roles = roles
             };
         }
@@ -142,7 +144,8 @@ namespace AttendVisionReportsApi.Services
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 CreatedAt = DateTime.UtcNow,
-                IsActive = true
+                IsActive = true,
+                ResetPassword = dto.ResetPassword
             };
             db.Users.Add(user);
             await db.SaveChangesAsync();
@@ -173,6 +176,8 @@ namespace AttendVisionReportsApi.Services
                     ? string.Concat(dto.FirstName.ToLower(), ".", dto.LastName.ToLower())
                     : user.Email;
             if (dto.IsActive.HasValue) user.IsActive = dto.IsActive.Value;
+            if (dto.ResetPassword.HasValue)
+                user.ResetPassword = dto.ResetPassword.Value;
             await db.SaveChangesAsync();
 
             // Update roles

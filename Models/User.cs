@@ -17,5 +17,7 @@
         public DateTime? LastLoginAt { get; set; }
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
+        [Column("reset_password")]
+        public bool ResetPassword { get; set; } = true;
     }
 }

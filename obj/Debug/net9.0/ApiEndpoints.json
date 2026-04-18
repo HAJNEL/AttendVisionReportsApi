@@ -33,6 +33,22 @@
   },
   {
     "ContainingType": "AttendVisionReportsApi.Controllers.AuthController",
+    "Method": "UpdatePassword",
+    "RelativePath": "api/auth/update-password",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "req",
+        "Type": "AttendVisionReportsApi.DTOs.UpdatePasswordRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AttendVisionReportsApi.Controllers.AuthController",
     "Method": "UsersExist",
     "RelativePath": "api/auth/users-exist",
     "HttpMethod": "GET",

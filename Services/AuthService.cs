@@ -75,7 +75,13 @@ namespace AttendVisionReportsApi.Services
         }
 
         private static LoginResponse Map(User u) =>
-            new(u.Id, u.Username, u.Email, string.Join(" ", new[]{u.FirstName, u.LastName}.Where(x => !string.IsNullOrWhiteSpace(x))));
+            new(
+                u.Id,
+                u.Username,
+                u.Email,
+                string.Join(" ", new[]{u.FirstName, u.LastName}.Where(x => !string.IsNullOrWhiteSpace(x))),
+                u.ResetPassword
+            );
 
         private string GenerateJwtToken(User user)
         {
@@ -99,6 +105,15 @@ namespace AttendVisionReportsApi.Services
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        public async Task<bool> UpdatePasswordAsync(Guid userId, string newPassword)
+        {
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return false;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.ResetPassword = false;
+            await db.SaveChangesAsync();
+            return true;
         }
     }
 }

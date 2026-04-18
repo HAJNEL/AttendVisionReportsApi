@@ -5,8 +5,27 @@ using Microsoft.AspNetCore.Mvc;
 namespace AttendVisionReportsApi.Controllers
 {
     [ApiController, Route("api/auth")]
-    public class AuthController(IAuthService authService) : ControllerBase
+    public class AuthController : ControllerBase
     {
+        private readonly IAuthService authService;
+        public AuthController(IAuthService authService)
+        {
+            this.authService = authService;
+        }
+
+        [HttpPost("update-password")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest req)
+        {
+            // Get user id from claims
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type.EndsWith("nameidentifier"));
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized();
+
+            var result = await authService.UpdatePasswordAsync(userId, req.NewPassword);
+            if (!result)
+                return BadRequest("Failed to update password.");
+            return Ok();
+        }
         [HttpGet("users-exist")]
         public Task<bool> UsersExist() => authService.UsersExistAsync();
 
@@ -23,7 +42,11 @@ namespace AttendVisionReportsApi.Controllers
         {
             var (response, error, token) = await authService.LoginAsync(req);
             if (response is null) return Unauthorized(error);
-            return Ok(new { token, user = response });
+            return Ok(new {
+                token,
+                user = response,
+                resetPassword = response.ResetPassword
+            });
         }
     }
 }

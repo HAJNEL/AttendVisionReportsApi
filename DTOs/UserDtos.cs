@@ -7,6 +7,7 @@ namespace AttendVisionReportsApi.DTOs
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public bool IsActive { get; set; }
+        public bool ResetPassword { get; set; }
         public List<RoleDto> Roles { get; set; } = new();
     }
 
@@ -16,6 +17,7 @@ namespace AttendVisionReportsApi.DTOs
         public string? LastName { get; set; }
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public bool ResetPassword { get; set; } = true;
         public List<Guid> Roles { get; set; } = new();
     }
 
@@ -26,6 +28,7 @@ namespace AttendVisionReportsApi.DTOs
         public string? Email { get; set; }
         public string? Password { get; set; }
         public bool? IsActive { get; set; }
+        public bool? ResetPassword { get; set; }
         public List<Guid> Roles { get; set; } = new();
     }
 }
