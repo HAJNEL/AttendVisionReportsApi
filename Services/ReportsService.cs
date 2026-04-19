@@ -1,3 +1,4 @@
+using System.Globalization;
 using Dapper;
 using Npgsql;
 
@@ -8,6 +9,8 @@ namespace AttendVisionReportsApi.Services
 
         public async Task<IEnumerable<dynamic>> GetIssuesAsync(string dateFrom, string dateTo, string? department)
         {
+            var df = DateOnly.ParseExact(dateFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var dt = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             using var conn = dataSource.CreateConnection();
             return await conn.QueryAsync<dynamic>(@"
 WITH base AS (
@@ -46,11 +49,13 @@ unmatched_break AS (
 SELECT date, time_of, person, employee_id, department, issue_type
 FROM (SELECT * FROM failed_issues UNION ALL SELECT * FROM no_checkout UNION ALL SELECT * FROM unmatched_break) combined
 ORDER BY date, time_of NULLS LAST, issue_type, person",
-                new { dateFrom, dateTo, dept = department });
+                new { dateFrom = df.ToString("yyyy-MM-dd"), dateTo = dt.ToString("yyyy-MM-dd"), dept = department });
         }
 
         public async Task<IEnumerable<dynamic>> GetClockingsAsync(string dateFrom, string dateTo, string? dept, string? user)
         {
+            var df = DateOnly.ParseExact(dateFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var dt = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             using var conn = dataSource.CreateConnection();
             return await conn.QueryAsync<dynamic>(
                 "SELECT access_date::text AS date," +
@@ -65,11 +70,13 @@ ORDER BY date, time_of NULLS LAST, issue_type, person",
                 "  AND (@dept::text IS NULL OR department = @dept) " +
                 "  AND (@user::text IS NULL OR COALESCE(NULLIF(TRIM(person_name), ''), employee_id) = @user) " +
                 "ORDER BY access_date, access_time, person",
-                new { dateFrom, dateTo, dept, user });
+                new { dateFrom = df.ToString("yyyy-MM-dd"), dateTo = dt.ToString("yyyy-MM-dd"), dept, user });
         }
 
         public async Task<IEnumerable<string>> GetTimesheetUsersAsync(string dateFrom, string dateTo, string? dept)
         {
+            var df = DateOnly.ParseExact(dateFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var dt = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             using var conn = dataSource.CreateConnection();
             return await conn.QueryAsync<string>(
                 "SELECT DISTINCT COALESCE(NULLIF(TRIM(person_name), ''), employee_id) AS name " +
@@ -78,11 +85,13 @@ ORDER BY date, time_of NULLS LAST, issue_type, person",
                 "  AND (@dept::text IS NULL OR department = @dept) " +
                 "  AND COALESCE(NULLIF(TRIM(person_name), ''), employee_id) IS NOT NULL " +
                 "ORDER BY name",
-                new { dateFrom, dateTo, dept });
+                new { dateFrom = df.ToString("yyyy-MM-dd"), dateTo = dt.ToString("yyyy-MM-dd"), dept });
         }
 
         public async Task<IEnumerable<dynamic>> GetTimesheetAsync(string dateFrom, string dateTo, string? dept, string? user)
         {
+            var df = DateOnly.ParseExact(dateFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var dt = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             using var conn = dataSource.CreateConnection();
             return await conn.QueryAsync<dynamic>(@"
 WITH all_records AS (
@@ -131,7 +140,7 @@ SELECT ds.person, ds.employee_id, ds.department,
 FROM day_summary ds
 LEFT JOIN break_totals bt ON ds.person = bt.person AND ds.access_date = bt.access_date
 ORDER BY ds.access_date, ds.person",
-                new { dateFrom, dateTo, dept, user });
+                new { dateFrom = df.ToString("yyyy-MM-dd"), dateTo = dt.ToString("yyyy-MM-dd"), dept, user });
         }
     }
 }

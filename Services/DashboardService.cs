@@ -7,6 +7,7 @@ namespace AttendVisionReportsApi.Services
       using AttendVisionReportsApi.Data;
       using AttendVisionReportsApi.Models;
       using Microsoft.EntityFrameworkCore;
+      using System.Globalization;
       public class DashboardService : IDashboardService
       {
         private readonly AppDbContext db;
@@ -20,8 +21,8 @@ namespace AttendVisionReportsApi.Services
 
         public async Task<DashboardKpisResponse> GetKpisAsync(string dateFrom, string dateTo, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-          var dateFromVal = DateOnly.Parse(dateFrom);
-          var dateToVal = DateOnly.Parse(dateTo);
+          var dateFromVal = DateOnly.ParseExact(dateFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+          var dateToVal = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", CultureInfo.InvariantCulture);
           var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
           var dateToFinal = dateToVal < today ? dateToVal : today;
 
@@ -67,7 +68,7 @@ namespace AttendVisionReportsApi.Services
 
         public async Task<IEnumerable<dynamic>> GetHourlyTrafficAsync(string date, string? department, System.Security.Claims.ClaimsPrincipal? user)
         {
-          var dateVal = DateOnly.Parse(date);
+          var dateVal = DateOnly.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
           var query = db.AccessRecords.AsQueryable();
           query = query.Where(x => x.AccessDate == dateVal);
@@ -108,7 +109,7 @@ namespace AttendVisionReportsApi.Services
             .GroupBy(x => x.AccessDate)
             .OrderBy(g => g.Key)
             .Select(g => new {
-              label = g.Key.ToString(),
+              label = g.Key.ToString("yyyy-MM-dd"),
               count = g.Select(x => x.EmployeeId).Distinct().Count()
             })
             .ToListAsync();
@@ -160,7 +161,7 @@ namespace AttendVisionReportsApi.Services
             .GroupBy(x => x.AccessDate)
             .OrderBy(g => g.Key)
             .Select(g => new {
-              label = g.Key.ToString(),
+              label = g.Key.ToString("yyyy-MM-dd"),
               count = g.Count()
             })
             .ToListAsync();
@@ -199,7 +200,7 @@ namespace AttendVisionReportsApi.Services
 
         public async Task<IEnumerable<dynamic>> GetDayEventsAsync(string date, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-          var dateVal = DateOnly.Parse(date);
+          var dateVal = DateOnly.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
           var query = db.AccessRecords.AsQueryable();
           query = query.Where(x => x.AccessDate == dateVal);
@@ -233,7 +234,7 @@ namespace AttendVisionReportsApi.Services
 
         public async Task<IEnumerable<DayPersonRowResponse>> GetDayPeopleAsync(string date, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-            var dateVal = DateOnly.Parse(date);
+            var dateVal = DateOnly.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
             var query = db.AccessRecords.AsQueryable();
             query = query.Where(x => x.AccessDate == dateVal);
