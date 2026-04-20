@@ -15,6 +15,39 @@ namespace AttendVisionReportsApi.Services
         {
           this.db = db;
         }
+          /// <summary>
+          /// Returns the number of employees currently on break for a given date, optionally filtered by department and employee.
+          /// </summary>
+          public async Task<int> GetOnBreakNowCountAsync(string date, string? department, string? employee)
+          {
+            var dateVal = DateOnly.ParseExact(date, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var query = db.AccessRecords.AsQueryable();
+            query = query.Where(x => x.AccessDate == dateVal);
+            var allowedDepartments = await GetAllowedDepartmentsAsync(null, department);
+            if (allowedDepartments != null)
+              query = query.Where(x => allowedDepartments.Contains(x.Department));
+            if (!string.IsNullOrEmpty(employee))
+              query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+
+            // Project to anonymous with employee key, datetime, and status
+            var records = await query
+              .Where(x => x.EmployeeId != null || !string.IsNullOrWhiteSpace(x.PersonName))
+              .Select(x => new {
+                PersonKey = !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown"),
+                x.AccessDatetime,
+                x.AttendanceStatus
+              })
+              .ToListAsync();
+
+            // Group by employee, get latest event, count those with 'break_out' and not followed by 'break_in'
+            var grouped = records
+              .GroupBy(x => x.PersonKey)
+              .Select(g => g.OrderByDescending(e => e.AccessDatetime).FirstOrDefault())
+              .Where(e => e != null && e.AttendanceStatus == "break_out")
+              .Count();
+
+            return grouped;
+          }
 
         public async Task<DashboardKpisResponse> GetKpisAsync(string dateFrom, string dateTo, string? department, string? employee)
           => await GetKpisAsync(dateFrom, dateTo, department, employee, null);

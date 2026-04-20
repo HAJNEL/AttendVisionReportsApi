@@ -55,6 +55,8 @@ public partial class Program
 
         builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
 
+    builder.Services.AddScoped<ITimeOverrideService, TimeOverrideService>();
+
         // Health Check Service
         builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
 

@@ -13,5 +13,6 @@ namespace AttendVisionReportsApi.Services
         Task<IEnumerable<dynamic>> GetDayEventsAsync(string date, string? department, string? employee);
         Task<IEnumerable<DayPersonRowResponse>> GetDayPeopleAsync(string date, string? department, string? employee);
         Task<IEnumerable<string>> GetEmployeesAsync(string? department);
+        Task<int> GetOnBreakNowCountAsync(string date, string? department, string? employee);
     }
 }

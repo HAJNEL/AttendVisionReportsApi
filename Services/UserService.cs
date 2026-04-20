@@ -229,7 +229,10 @@ namespace AttendVisionReportsApi.Services
                               d.Country,
                               d.SerialNo,
                               d.CompanyId,
-                              c != null ? c.Name : null
+                              c != null ? c.Name : null,
+                              (double?)d.OvertimePaymentRate,
+                              d.OvertimeStartAfterTime.HasValue ? d.OvertimeStartAfterTime.Value.ToString(@"hh\:mm\:ss") : null,
+                              d.CheckInOverrideTime.HasValue ? d.CheckInOverrideTime.Value.ToString(@"hh\:mm\:ss") : null
                           )).ToListAsync();
         }
 

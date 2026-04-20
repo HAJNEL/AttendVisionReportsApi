@@ -15,6 +15,7 @@
         public DbSet<Permission> Permissions => Set<Permission>();
         public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
         public DbSet<DepartmentUser> DepartmentUsers => Set<DepartmentUser>();
+        public DbSet<TimeOverride> TimeOverrides => Set<TimeOverride>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -59,6 +60,27 @@
                 .WithMany(p => p.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // TimeOverride configuration
+            modelBuilder.Entity<TimeOverride>()
+                .ToTable("time_overrides")
+                .HasKey(t => t.Id);
+
+            modelBuilder.Entity<TimeOverride>()
+                .HasOne(t => t.Department)
+                .WithMany()
+                .HasForeignKey(t => t.DepartmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TimeOverride>()
+                .Property(t => t.FromTime)
+                .HasColumnName("from_time");
+            modelBuilder.Entity<TimeOverride>()
+                .Property(t => t.ToTime)
+                .HasColumnName("to_time");
+            modelBuilder.Entity<TimeOverride>()
+                .Property(t => t.OverrideTime)
+                .HasColumnName("override_time");
         }
     }
 }

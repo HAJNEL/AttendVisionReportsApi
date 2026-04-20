@@ -17,5 +17,9 @@
         [Column("country")] public string? Country { get; set; }
         [Column("serial_no")] public string? SerialNo { get; set; }
         [Column("companyid")] public Guid? CompanyId { get; set; }
+
+        [Column("overtime_payment_rate")] public decimal? OvertimePaymentRate { get; set; }
+        [Column("overtime_start_after_time")] public TimeSpan? OvertimeStartAfterTime { get; set; }
+        [Column("check_in_override_time")] public TimeSpan? CheckInOverrideTime { get; set; }
     }
 }
