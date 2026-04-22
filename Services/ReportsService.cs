@@ -106,11 +106,29 @@ WITH all_records AS (
     AND (@dept::text IS NULL OR ar.department = @dept)
     AND (@user::text IS NULL OR COALESCE(NULLIF(TRIM(ar.person_name), ''), ar.employee_id) = @user)
 ),
+leave_records AS (
+  SELECT employee_id, full_name, department_id, type, from_time, to_time,
+         generate_series(from_date, to_date, '1 day'::interval)::date AS access_date
+  FROM employee_leave
+  WHERE (from_date <= @dateTo::date AND to_date >= @dateFrom::date)
+),
+combined_days AS (
+  SELECT person, employee_id, department, department_id, access_date FROM all_records
+  GROUP BY person, employee_id, department, department_id, access_date
+  UNION
+  SELECT lr.full_name, lr.employee_id, d.department_name, lr.department_id, lr.access_date
+  FROM leave_records lr
+  JOIN departments d ON lr.department_id = d.id
+  WHERE (@dept::text IS NULL OR d.department_name = @dept)
+    AND (@user::text IS NULL OR lr.full_name = @user OR lr.employee_id = @user)
+),
 daily_bounds AS (
-  SELECT person, employee_id, department, department_id, access_date,
-    MIN(CASE WHEN attendance_status = 'check_in' THEN access_datetime END) AS raw_in_dt,
-    MAX(CASE WHEN attendance_status = 'check_out' THEN access_datetime END) AS raw_out_dt
-  FROM all_records GROUP BY person, employee_id, department, department_id, access_date
+  SELECT cd.person, cd.employee_id, cd.department, cd.department_id, cd.access_date,
+    MIN(CASE WHEN ar.attendance_status = 'check_in' THEN ar.access_datetime END) AS raw_in_dt,
+    MAX(CASE WHEN ar.attendance_status = 'check_out' THEN ar.access_datetime END) AS raw_out_dt
+  FROM combined_days cd
+  LEFT JOIN all_records ar ON cd.person = ar.person AND cd.access_date = ar.access_date
+  GROUP BY cd.person, cd.employee_id, cd.department, cd.department_id, cd.access_date
 ),
 time_override AS (
   SELECT t.id AS override_id, t.department_id, t.from_time, t.to_time, t.override_time
@@ -160,14 +178,25 @@ break_totals AS (
   GROUP BY person, employee_id, department, access_date
 )
 SELECT 
-  eb.person, eb.employee_id, eb.department,
+  eb.person,
+  CASE 
+    WHEN (COALESCE(EXTRACT(EPOCH FROM (GREATEST(eb.raw_out_dt, eb.eff_in_dt) - eb.eff_in_dt)) / 3600.0, 0) - COALESCE(bt.break_hours, 0)) > 0.0166 THEN 'Worked'
+    WHEN ld.type IS NOT NULL THEN INITCAP(CONCAT(INITCAP(ld.type), ' Leave'))
+    ELSE 'Issue'
+  END AS status,
+  eb.employee_id, eb.department,
   eb.access_date::text AS date,
-  COALESCE((eb.eff_in_dt::time)::text, '') AS first_entry,
-  COALESCE((eb.raw_out_dt::time)::text, '') AS last_entry,
+  COALESCE((eb.eff_in_dt::time)::text, TO_CHAR(ld.from_time, 'HH24:MI:SS'), '') AS first_entry,
+  COALESCE((eb.raw_out_dt::time)::text, TO_CHAR(ld.to_time, 'HH24:MI:SS'), '') AS last_entry,
   COALESCE(EXTRACT(EPOCH FROM (GREATEST(eb.raw_out_dt, eb.eff_in_dt) - eb.eff_in_dt)) / 3600.0, 0)::float8 AS hours_worked,
   COALESCE(bt.break_hours, 0)::float8 AS break_hours
 FROM effective_bounds eb
 LEFT JOIN break_totals bt ON eb.person = bt.person AND eb.access_date = bt.access_date
+LEFT JOIN (
+  SELECT employee_id, full_name, access_date, MAX(type) as type, MIN(from_time) as from_time, MAX(to_time) as to_time
+  FROM leave_records
+  GROUP BY employee_id, full_name, access_date
+) ld ON (ld.employee_id = eb.employee_id OR ld.full_name = eb.person) AND ld.access_date = eb.access_date
 ORDER BY eb.access_date, eb.person",
                 new { dateFrom = df.ToString("yyyy-MM-dd"), dateTo = dt.ToString("yyyy-MM-dd"), dept, user });
         }

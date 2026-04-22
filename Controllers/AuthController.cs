@@ -16,9 +16,8 @@ namespace AttendVisionReportsApi.Controllers
         [HttpPost("update-password")]
         public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest req)
         {
-            // Get user id from claims
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type.EndsWith("nameidentifier"));
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+
+            if (!Helpers.ClaimsHelper.TryGetUserId(User, out var userId, logClaims: false))
                 return Unauthorized();
 
             var result = await authService.UpdatePasswordAsync(userId, req.NewPassword);

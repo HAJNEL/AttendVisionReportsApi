@@ -16,8 +16,41 @@
         public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
         public DbSet<DepartmentUser> DepartmentUsers => Set<DepartmentUser>();
         public DbSet<TimeOverride> TimeOverrides => Set<TimeOverride>();
+        public DbSet<EmployeeLeave> EmployeeLeaves => Set<EmployeeLeave>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // EmployeeLeave configuration
+            modelBuilder.Entity<EmployeeLeave>()
+                .ToTable("employee_leave")
+                .HasKey(e => e.Id);
+
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.Type)
+                .HasColumnName("type");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.FromDate)
+                .HasColumnName("from_date");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.ToDate)
+                .HasColumnName("to_date");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.FromTime)
+                .HasColumnName("from_time");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.ToTime)
+                .HasColumnName("to_time");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.EmployeeId)
+                .HasColumnName("employee_id");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.FullName)
+                .HasColumnName("full_name");
+            modelBuilder.Entity<EmployeeLeave>()
+                .HasOne<Department>()
+                .WithMany()
+                .HasForeignKey(e => e.DepartmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             base.OnModelCreating(modelBuilder);
 
             // DepartmentUser configuration

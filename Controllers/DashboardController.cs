@@ -47,7 +47,4 @@ public class DashboardController(IDashboardService dashboardService) : Controlle
     public async Task<IActionResult> GetDayPeople([FromQuery] string date, [FromQuery] string? department, [FromQuery] string? employee) =>
         Ok(await dashboardService.GetDayPeopleAsync(date, department, employee));
 
-    [HttpGet("employees")]
-    public async Task<IActionResult> GetEmployees([FromQuery] string? department) =>
-        Ok(await dashboardService.GetEmployeesAsync(department));
 }

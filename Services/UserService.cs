@@ -15,17 +15,7 @@ namespace AttendVisionReportsApi.Services
 
             public async Task<IEnumerable<PermissionDto>?> GetPermissionsForCurrentUserAsync(System.Security.Claims.ClaimsPrincipal user)
             {
-                // Debug: log all claims (set a breakpoint or log as needed)
-                var claims = user.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
-                // Example: System.Diagnostics.Debug.WriteLine(string.Join("; ", claims));
-
-                // Try common claim types for user id
-                var userIdClaim = user.Claims.FirstOrDefault(c =>
-                    c.Type == "sub" ||
-                    c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier" ||
-                    c.Type.EndsWith("nameidentifier"));
-
-                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                if (!Helpers.ClaimsHelper.TryGetUserId(user, out var userId, logClaims: false))
                     return null;
 
                 var permissions = await (from u in db.Users

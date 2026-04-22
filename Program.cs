@@ -53,9 +53,11 @@ public partial class Program
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IRoleService, RoleService>();
 
-        builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
 
-    builder.Services.AddScoped<ITimeOverrideService, TimeOverrideService>();
+        builder.Services.AddScoped<IDepartmentUserService, DepartmentUserService>();
+        builder.Services.AddScoped<IFilterService, FilterService>();
+        builder.Services.AddScoped<ITimeOverrideService, TimeOverrideService>();
+        builder.Services.AddScoped<IEmployeeLeaveService, EmployeeLeaveService>();
 
         // Health Check Service
         builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();

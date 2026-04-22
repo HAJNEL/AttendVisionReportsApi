@@ -1,7 +1,7 @@
 ﻿namespace AttendVisionReportsApi.DTOs
 {
     public record DashboardKpisResponse(
-        long TotalEmployees, long CheckinsToday, long OnSiteNow, long FailedToday);
+        long TotalEmployees, long CheckinsToday, long OnSiteNow, long OnBreakNow);
 
     public record LabeledCountResponse(string Label, long Count);
 

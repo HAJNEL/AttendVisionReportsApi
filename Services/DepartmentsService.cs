@@ -35,11 +35,8 @@ namespace AttendVisionReportsApi.Services
         // Overload: filter by current user
         public async Task<List<DepartmentResponse>> GetAllForUserAsync(System.Security.Claims.ClaimsPrincipal user)
         {
-            var userIdClaim = user.Claims.FirstOrDefault(c =>
-                c.Type == "sub" ||
-                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier" ||
-                c.Type.EndsWith("nameidentifier"));
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+
+            if (!Helpers.ClaimsHelper.TryGetUserId(user, out var userId, logClaims: false))
                 return new List<DepartmentResponse>();
 
             var departmentIds = await db.DepartmentUsers

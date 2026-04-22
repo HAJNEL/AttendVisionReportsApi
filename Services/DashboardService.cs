@@ -25,7 +25,7 @@ namespace AttendVisionReportsApi.Services
             query = query.Where(x => x.AccessDate == dateVal);
             var allowedDepartments = await GetAllowedDepartmentsAsync(null, department);
             if (allowedDepartments != null)
-              query = query.Where(x => allowedDepartments.Contains(x.Department));
+              query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
             if (!string.IsNullOrEmpty(employee))
               query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
 
@@ -64,7 +64,7 @@ namespace AttendVisionReportsApi.Services
           query = query.Where(x => x.AccessDate >= dateFromVal && x.AccessDate <= dateToFinal);
           var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
           if (allowedDepartments != null)
-            query = query.Where(x => allowedDepartments.Contains(x.Department));
+            query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
             query = query.Where(x => (x.PersonName != null && x.PersonName.Trim() != "") ? x.PersonName == employee : x.EmployeeId == employee);
 
@@ -78,7 +78,7 @@ namespace AttendVisionReportsApi.Services
           var onSiteQuery = db.AccessRecords.AsQueryable();
           onSiteQuery = onSiteQuery.Where(x => x.AccessDate == dateToFinal && x.EmployeeId != null);
           if (allowedDepartments != null)
-            onSiteQuery = onSiteQuery.Where(x => allowedDepartments.Contains(x.Department));
+            onSiteQuery = onSiteQuery.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
             onSiteQuery = onSiteQuery.Where(x => (x.PersonName != null && x.PersonName.Trim() != "") ? x.PersonName == employee : x.EmployeeId == employee);
 
@@ -107,7 +107,7 @@ namespace AttendVisionReportsApi.Services
           query = query.Where(x => x.AccessDate == dateVal);
           var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
           if (allowedDepartments != null)
-            query = query.Where(x => allowedDepartments.Contains(x.Department));
+            query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
 
           var result = await query
             .GroupBy(x => x.AccessTime)
@@ -134,7 +134,7 @@ namespace AttendVisionReportsApi.Services
           query = query.Where(x => x.AccessDate >= monthStart && x.EmployeeId != null);
           var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
           if (allowedDepartments != null)
-            query = query.Where(x => allowedDepartments.Contains(x.Department));
+            query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
             query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
 
@@ -160,7 +160,7 @@ namespace AttendVisionReportsApi.Services
           query = query.Where(x => x.AccessDate == today && x.AttendanceStatus == "check_in" && x.EmployeeId != null);
           var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
           if (allowedDepartments != null)
-            query = query.Where(x => allowedDepartments.Contains(x.Department));
+            query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
 
           var result = await query
             .GroupBy(x => x.Department)
@@ -186,7 +186,7 @@ namespace AttendVisionReportsApi.Services
           query = query.Where(x => x.AccessDate >= dateStart && x.AccessDate < dateEnd);
           var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
           if (allowedDepartments != null)
-            query = query.Where(x => allowedDepartments.Contains(x.Department));
+            query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
             query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
 
@@ -213,7 +213,7 @@ namespace AttendVisionReportsApi.Services
           query = query.Where(x => x.AccessDate >= dateStart && x.AccessDate < dateEnd);
           var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
           if (allowedDepartments != null)
-            query = query.Where(x => allowedDepartments.Contains(x.Department));
+            query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
             query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
 
@@ -239,7 +239,7 @@ namespace AttendVisionReportsApi.Services
           query = query.Where(x => x.AccessDate == dateVal);
           var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
           if (allowedDepartments != null)
-            query = query.Where(x => allowedDepartments.Contains(x.Department));
+            query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
             query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
 
@@ -273,7 +273,7 @@ namespace AttendVisionReportsApi.Services
             query = query.Where(x => x.AccessDate == dateVal);
             var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
             if (allowedDepartments != null)
-              query = query.Where(x => allowedDepartments.Contains(x.Department));
+              query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
             if (!string.IsNullOrEmpty(employee))
               query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
 
@@ -344,36 +344,15 @@ namespace AttendVisionReportsApi.Services
             return result.OrderByDescending(x => x.event_count).ThenBy(x => x.person).ToList();
         }
 
-        public async Task<IEnumerable<string>> GetEmployeesAsync(string? department)
-          => await GetEmployeesAsync(department, null);
-
-        public async Task<IEnumerable<string>> GetEmployeesAsync(string? department, System.Security.Claims.ClaimsPrincipal? user)
-        {
-            var query = db.AccessRecords.AsQueryable();
-            var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
-            if (allowedDepartments != null)
-                query = query.Where(x => allowedDepartments.Contains(x.Department));
-            query = query.Where(x => x.PersonName != null && x.PersonName.Trim() != "");
-            var result = await query
-                .Select(x => !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown"))
-                .Distinct()
-                .OrderBy(x => x)
-                .ToListAsync<string>();
-            return result;
-        }
 
         // Helper: get allowed departments for user
         private async Task<List<string>?> GetAllowedDepartmentsAsync(System.Security.Claims.ClaimsPrincipal? user, string? department)
         {
             if (!string.IsNullOrEmpty(department))
                 return new List<string> { department };
-            if (user == null)
+              if (user == null)
                 return null;
-            var userIdClaim = user.Claims.FirstOrDefault(c =>
-                c.Type == "sub" ||
-                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier" ||
-                c.Type.EndsWith("nameidentifier"));
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+              if (!Helpers.ClaimsHelper.TryGetUserId(user, out var userId, logClaims: false))
                 return null;
             var departmentIds = await db.DepartmentUsers
                 .Where(du => du.UserId == userId)
