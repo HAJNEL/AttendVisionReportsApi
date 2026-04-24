@@ -6,13 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 public class DashboardController(IDashboardService dashboardService) : ControllerBase
 {
 
-    [HttpGet("on-break-now")]
-    public async Task<IActionResult> GetOnBreakNow(
-        [FromQuery] string date,
-        [FromQuery] string? department,
-        [FromQuery] string? employee) =>
-        Ok(await dashboardService.GetOnBreakNowCountAsync(date, department, employee));
-
     [HttpGet("kpis")]
     public async Task<IActionResult> GetKpis(
         [FromQuery] string dateFrom, [FromQuery] string dateTo, [FromQuery] string? department, [FromQuery] string? employee) =>

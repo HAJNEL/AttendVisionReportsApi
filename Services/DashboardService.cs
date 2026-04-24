@@ -15,85 +15,284 @@ namespace AttendVisionReportsApi.Services
         {
           this.db = db;
         }
-          /// <summary>
-          /// Returns the number of employees currently on break for a given date, optionally filtered by department and employee.
-          /// </summary>
-          public async Task<int> GetOnBreakNowCountAsync(string date, string? department, string? employee)
-          {
-            var dateVal = DateOnly.ParseExact(date, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
-            var query = db.AccessRecords.AsQueryable();
-            query = query.Where(x => x.AccessDate == dateVal);
-            var allowedDepartments = await GetAllowedDepartmentsAsync(null, department);
-            if (allowedDepartments != null)
-              query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
-            if (!string.IsNullOrEmpty(employee))
-              query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
 
-            // Project to anonymous with employee key, datetime, and status
-            var records = await query
-              .Where(x => x.EmployeeId != null || !string.IsNullOrWhiteSpace(x.PersonName))
-              .Select(x => new {
-                PersonKey = !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown"),
-                x.AccessDatetime,
-                x.AttendanceStatus
-              })
-              .ToListAsync();
-
-            // Group by employee, get latest event, count those with 'break_out' and not followed by 'break_in'
-            var grouped = records
-              .GroupBy(x => x.PersonKey)
-              .Select(g => g.OrderByDescending(e => e.AccessDatetime).FirstOrDefault())
-              .Where(e => e != null && e.AttendanceStatus == "break_out")
-              .Count();
-
-            return grouped;
-          }
 
         public async Task<DashboardKpisResponse> GetKpisAsync(string dateFrom, string dateTo, string? department, string? employee)
-          => await GetKpisAsync(dateFrom, dateTo, department, employee, null);
+            => await GetKpisAsync(dateFrom, dateTo, department, employee, null);
 
         public async Task<DashboardKpisResponse> GetKpisAsync(string dateFrom, string dateTo, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
         {
-          var dateFromVal = DateOnly.ParseExact(dateFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-          var dateToVal = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-          var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
-          var dateToFinal = dateToVal < today ? dateToVal : today;
+            var totalEmployeesDetails = await GetTotalEmployeesKpiDetailsAsync(dateFrom, dateTo, department, employee, user);
+            var checkinsTodayDetails = await GetCheckinsTodayKpiDetailsAsync(dateFrom, dateTo, department, employee, user);
+            var onSiteDetails = await GetOnSiteKpiDetailsAsync(dateFrom, dateTo, department, employee, user);
+            var onBreakDetails = await GetOnBreakKpiDetailsAsync(dateFrom, dateTo, department, employee, user);
 
+            return new DashboardKpisResponse(
+                totalEmployeesDetails,
+                checkinsTodayDetails,
+                onSiteDetails,
+                onBreakDetails
+            );
+        }
 
+        // Private KPI detail methods
+        private async Task<List<EmployeeKpiDetail>> GetTotalEmployeesKpiDetailsAsync(string dateFrom, string dateTo, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        {
+            var dateFromVal = DateOnly.ParseExact(dateFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var dateToVal = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var dateToFinal = dateToVal < today ? dateToVal : today;
+
+            var depts = await db.Departments.ToListAsync();
+            var deptLookup = depts.ToDictionary(d => d.DepartmentName, StringComparer.OrdinalIgnoreCase);
+
+            var query = db.AccessRecords.AsQueryable();
+            query = query.Where(x => x.AccessDate >= dateFromVal && x.AccessDate <= dateToFinal);
+            var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+            if (allowedDepartments != null)
+                query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
+            if (!string.IsNullOrEmpty(employee))
+              query = query.Where(x => x.EmployeeId == employee);
+
+            var rangeRecords = await query
+                .Where(x => x.EmployeeId != null)
+                .Select(x => new { x.EmployeeId, x.PersonName, x.Department, x.AccessDatetime, x.AccessTime, x.AttendanceStatus })
+                .ToListAsync();
+
+            var rangeGrouped = rangeRecords
+                .GroupBy(x => x.EmployeeId)
+                .Select(g => {
+                    var events = g.OrderBy(r => r.AccessDatetime).ToList();
+                    var latest = events.LastOrDefault();
+                    var firstCheckIn = events.FirstOrDefault(r => r.AttendanceStatus == "check_in");
+                    var lastCheckOut = events.LastOrDefault(r => r.AttendanceStatus == "check_out");
+
+                    string? checkInTime = firstCheckIn != null ? events.FirstOrDefault(r => r.AttendanceStatus == "check_in")?.AccessTime.ToString("HH:mm:ss") : null;
+                    string? checkOutTime = lastCheckOut != null ? events.LastOrDefault(r => r.AttendanceStatus == "check_out")?.AccessTime.ToString("HH:mm:ss") : null;
+
+                    var deptName = latest?.Department ?? "Unknown";
+                    deptLookup.TryGetValue(deptName, out var deptModel);
+
+                    return new EmployeeKpiDetail(
+                        g.Key,
+                        deptName,
+                        latest?.PersonName ?? g.Key,
+                        checkInTime,
+                        checkOutTime,
+                        latest?.AttendanceStatus
+                    );
+                })
+                .ToList();
+
+            return rangeGrouped;
+        }
+
+        private async Task<List<CheckInKpiDetail>> GetCheckinsTodayKpiDetailsAsync(string dateFrom, string dateTo, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        {
+            var dateFromVal = DateOnly.ParseExact(dateFrom, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var dateToVal = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var dateToFinal = dateToVal < today ? dateToVal : today;
+
+            var depts = await db.Departments.ToListAsync();
+            var deptLookup = depts.ToDictionary(d => d.DepartmentName, StringComparer.OrdinalIgnoreCase);
+
+            var query = db.AccessRecords.AsQueryable();
+            query = query.Where(x => x.AccessDate >= dateFromVal && x.AccessDate <= dateToFinal);
+            var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+            if (allowedDepartments != null)
+                query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
+            if (!string.IsNullOrEmpty(employee))
+              query = query.Where(x => x.EmployeeId == employee);
+
+            var rangeRecords = await query
+                .Where(x => x.EmployeeId != null)
+                .Select(x => new { x.EmployeeId, x.PersonName, x.Department, x.AccessDatetime, x.AccessTime, x.AttendanceStatus })
+                .ToListAsync();
+
+            var rangeGrouped = rangeRecords
+                .GroupBy(x => x.EmployeeId)
+                .Select(g => {
+                    var events = g.OrderBy(r => r.AccessDatetime).ToList();
+                    var latest = events.LastOrDefault();
+                    var firstCheckIn = events.FirstOrDefault(r => r.AttendanceStatus == "check_in");
+                    string? checkInTime = firstCheckIn != null ? events.FirstOrDefault(r => r.AttendanceStatus == "check_in")?.AccessTime.ToString("HH:mm:ss") : null;
+                    return new {
+                        EmployeeId = g.Key,
+                        DepartmentName = latest?.Department ?? "Unknown",
+                        FullName = latest?.PersonName ?? g.Key,
+                        HasCheckIn = firstCheckIn != null,
+                        CheckInTime = checkInTime
+                    };
+                })
+                .Where(d => d.HasCheckIn)
+                .Select(d => new CheckInKpiDetail(
+                    d.EmployeeId,
+                    d.DepartmentName,
+                    d.FullName,
+                    d.CheckInTime,
+                    null,
+                    null
+                ))
+                .ToList();
+
+            return rangeGrouped;
+        }
+
+        private async Task<List<OnSiteKpiDetail>> GetOnSiteKpiDetailsAsync(string dateFrom, string dateTo, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        {
+            var dateToVal = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+            var dateToFinal = dateToVal < today ? dateToVal : today;
+            var now = DateTime.UtcNow;
+
+            var onSiteQuery = db.AccessRecords.AsQueryable();
+            onSiteQuery = onSiteQuery.Where(x => x.AccessDate == dateToFinal && x.EmployeeId != null);
+            var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
+            if (allowedDepartments != null)
+                onSiteQuery = onSiteQuery.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
+            if (!string.IsNullOrEmpty(employee))
+              onSiteQuery = onSiteQuery.Where(x => x.EmployeeId == employee);
+
+            var currentRecords = await onSiteQuery
+                .Select(x => new { x.EmployeeId, x.PersonName, x.Department, x.AccessDatetime, x.AttendanceStatus })
+                .ToListAsync();
+
+            var currentGrouped = currentRecords
+                .GroupBy(x => x.EmployeeId)
+                .Select(g => {
+                    var events = g.OrderBy(r => r.AccessDatetime).ToList();
+                    var latest = events.LastOrDefault();
+                    var firstCheckIn = events.FirstOrDefault(e => e.AttendanceStatus == "check_in");
+                    var lastCheckOut = events.LastOrDefault(e => e.AttendanceStatus == "check_out");
+
+                    DateTime endTime;
+                    if (lastCheckOut != null)
+                        endTime = lastCheckOut.AccessDatetime;
+                    else if (events.Count > 0 && events.Last().AccessDatetime.Date == now.Date)
+                        endTime = now;
+                    else
+                        endTime = events.LastOrDefault()?.AccessDatetime ?? now;
+
+                    double totalBreakMs = 0;
+                    DateTime? breakStart = null;
+                    foreach (var e in events)
+                    {
+                        if (e.AttendanceStatus == "break_out")
+                        {
+                            breakStart = e.AccessDatetime;
+                        }
+                        else if (e.AttendanceStatus == "break_in" && breakStart != null)
+                        {
+                            totalBreakMs += (e.AccessDatetime - breakStart.Value).TotalMilliseconds;
+                            breakStart = null;
+                        }
+                    }
+                    if (breakStart != null)
+                    {
+                        totalBreakMs += (now - breakStart.Value).TotalMilliseconds;
+                    }
+
+                    double totalWorkedMs = 0;
+                    if (firstCheckIn != null)
+                    {
+                        totalWorkedMs = (endTime - firstCheckIn.AccessDatetime).TotalMilliseconds - totalBreakMs;
+                        if (totalWorkedMs < 0) totalWorkedMs = 0;
+                    }
+
+                    var lastBreakIn = events.LastOrDefault(e => e.AttendanceStatus == "break_in");
+                    string timeSinceLastBreak = "00:00";
+                    if (lastBreakIn != null)
+                    {
+                        timeSinceLastBreak = (now - lastBreakIn.AccessDatetime).ToString(@"hh\:mm");
+                    }
+                    else if (firstCheckIn != null)
+                    {
+                        timeSinceLastBreak = (now - firstCheckIn.AccessDatetime).ToString(@"hh\:mm");
+                    }
+
+                    return new {
+                        EmployeeId = g.Key,
+                        FullName = latest?.PersonName ?? g.Key,
+                        DepartmentName = latest?.Department ?? "Unknown",
+                        LatestStatus = latest?.AttendanceStatus,
+                        TotalWorked = TimeSpan.FromMilliseconds(totalWorkedMs).ToString(@"hh\:mm"),
+                        TimeSinceLastBreak = timeSinceLastBreak
+                    };
+                })
+                .ToList();
+
+            var onSiteDetails = currentGrouped
+                .Where(d => d.LatestStatus == "check_in" || d.LatestStatus == "break_in")
+                .Select(d => new OnSiteKpiDetail(
+                    d.EmployeeId, d.DepartmentName, d.FullName, d.TotalWorked, d.TimeSinceLastBreak)).ToList();
+
+            return onSiteDetails;
+        }
+
+        private async Task<List<OnBreakKpiDetail>> GetOnBreakKpiDetailsAsync(string dateFrom, string dateTo, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        {
+          // We'll use dateTo as the date for the KPI (like the other KPIs)
+          var dateVal = DateOnly.ParseExact(dateTo, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
           var query = db.AccessRecords.AsQueryable();
-          query = query.Where(x => x.AccessDate >= dateFromVal && x.AccessDate <= dateToFinal);
+          query = query.Where(x => x.AccessDate == dateVal);
           var allowedDepartments = await GetAllowedDepartmentsAsync(user, department);
           if (allowedDepartments != null)
             query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
-            query = query.Where(x => (x.PersonName != null && x.PersonName.Trim() != "") ? x.PersonName == employee : x.EmployeeId == employee);
+            query = query.Where(x => x.EmployeeId == employee);
 
-          var total = await query.Where(x => x.EmployeeId != null).Select(x => x.EmployeeId).Distinct().CountAsync();
-
-          var checkins = await query.Where(x => x.AttendanceStatus == "check_in" && x.EmployeeId != null)
-            .Select(x => x.EmployeeId).Distinct().CountAsync();
-
-          // OnSite: employees who checked in but not checked out on dateToFinal
-
-          var onSiteQuery = db.AccessRecords.AsQueryable();
-          onSiteQuery = onSiteQuery.Where(x => x.AccessDate == dateToFinal && x.EmployeeId != null);
-          if (allowedDepartments != null)
-            onSiteQuery = onSiteQuery.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
-          if (!string.IsNullOrEmpty(employee))
-            onSiteQuery = onSiteQuery.Where(x => (x.PersonName != null && x.PersonName.Trim() != "") ? x.PersonName == employee : x.EmployeeId == employee);
-
-          var onSite = await onSiteQuery
-            .GroupBy(x => x.EmployeeId)
-            .Select(g => new
-            {
-              HasCheckin = g.Any(r => r.AttendanceStatus == "check_in"),
-              HasCheckout = g.Any(r => r.AttendanceStatus == "check_out")
+          var records = await query
+            .Where(x => x.EmployeeId != null || !string.IsNullOrWhiteSpace(x.PersonName))
+            .Select(x => new {
+              PersonKey = !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown"),
+              x.Department,
+              x.AccessDatetime,
+              x.AttendanceStatus
             })
-            .CountAsync(x => x.HasCheckin && !x.HasCheckout);
+            .ToListAsync();
 
-          var failed = await query.Where(x => x.AttendanceStatus == "").CountAsync();
+          // Group by employee, get all events for each
+          var now = DateTime.UtcNow;
+          var result = new List<OnBreakKpiDetail>();
+          foreach (var group in records.GroupBy(x => new { x.PersonKey, x.Department }))
+          {
+            var events = group.OrderBy(e => e.AccessDatetime).ToList();
+            // Find the latest event
+            var latest = events.LastOrDefault();
+            if (latest == null || latest.AttendanceStatus != "break_out")
+              continue;
 
-          return new DashboardKpisResponse(total, checkins, onSite, failed);
+            // Find when the break started (the last break_out not followed by break_in)
+            DateTime? breakStart = null;
+            for (int i = events.Count - 1; i >= 0; i--)
+            {
+              if (events[i].AttendanceStatus == "break_out")
+              {
+                breakStart = events[i].AccessDatetime;
+                // Check if there is a break_in after this break_out
+                bool hasBreakIn = events.Skip(i + 1).Any(e => e.AttendanceStatus == "break_in");
+                if (!hasBreakIn)
+                  break;
+                else
+                  breakStart = null;
+              }
+            }
+            if (breakStart == null)
+              continue;
+
+            var breakTimeAgo = (now - breakStart.Value).ToString(@"hh\:mm");
+            var totalTimeOnBreak = (now - breakStart.Value).ToString(@"hh\:mm");
+
+            result.Add(new OnBreakKpiDetail(
+              group.Key.PersonKey,
+              group.Key.Department ?? "Unknown",
+              group.Key.PersonKey,
+              breakTimeAgo,
+              totalTimeOnBreak
+            ));
+          }
+          return result;
         }
 
         public async Task<IEnumerable<dynamic>> GetHourlyTrafficAsync(string date, string? department)
@@ -136,7 +335,7 @@ namespace AttendVisionReportsApi.Services
           if (allowedDepartments != null)
             query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
-            query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+            query = query.Where(x => x.EmployeeId == employee);
 
           var result = await query
             .GroupBy(x => x.AccessDate)
@@ -188,7 +387,7 @@ namespace AttendVisionReportsApi.Services
           if (allowedDepartments != null)
             query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
-            query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+            query = query.Where(x => x.EmployeeId == employee);
 
           var result = await query
             .GroupBy(x => x.AccessDate)
@@ -215,7 +414,7 @@ namespace AttendVisionReportsApi.Services
           if (allowedDepartments != null)
             query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
-            query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+            query = query.Where(x => x.EmployeeId == employee);
 
           var result = await query
             .GroupBy(x => new { x.AccessDate.Year, x.AccessDate.Month })
@@ -241,7 +440,7 @@ namespace AttendVisionReportsApi.Services
           if (allowedDepartments != null)
             query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
           if (!string.IsNullOrEmpty(employee))
-            query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+            query = query.Where(x => x.EmployeeId == employee);
 
           // Group by 15-minute intervals and attendance_status
           var records = await query.ToListAsync();
@@ -275,7 +474,7 @@ namespace AttendVisionReportsApi.Services
             if (allowedDepartments != null)
               query = query.Where(x => !string.IsNullOrEmpty(x.Department) && allowedDepartments.Contains(x.Department));
             if (!string.IsNullOrEmpty(employee))
-              query = query.Where(x => (!string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : x.EmployeeId) == employee);
+              query = query.Where(x => x.EmployeeId == employee);
 
             var records = await query
               .Select(x => new {

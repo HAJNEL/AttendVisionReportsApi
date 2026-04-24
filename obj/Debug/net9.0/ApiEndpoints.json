@@ -350,32 +350,6 @@
   },
   {
     "ContainingType": "DashboardController",
-    "Method": "GetOnBreakNow",
-    "RelativePath": "api/dashboard/on-break-now",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "date",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "department",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "employee",
-        "Type": "System.String",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "DashboardController",
     "Method": "GetYearlyTraffic",
     "RelativePath": "api/dashboard/yearly-traffic",
     "HttpMethod": "GET",
