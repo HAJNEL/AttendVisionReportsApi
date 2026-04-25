@@ -210,7 +210,6 @@ namespace AttendVisionReportsApi.Services
                               d.Id,
                               d.DepartmentName,
                               d.Manager,
-                              (double?)d.PaymentRate,
                               d.AddressLine1,
                               d.AddressLine2,
                               d.City,
@@ -219,10 +218,7 @@ namespace AttendVisionReportsApi.Services
                               d.Country,
                               d.SerialNo,
                               d.CompanyId,
-                              c != null ? c.Name : null,
-                              (double?)d.OvertimePaymentRate,
-                              d.OvertimeStartAfterTime.HasValue ? d.OvertimeStartAfterTime.Value.ToString(@"hh\:mm\:ss") : null,
-                              d.CheckInOverrideTime.HasValue ? d.CheckInOverrideTime.Value.ToString(@"hh\:mm\:ss") : null
+                              c != null ? c.Name : null
                           )).ToListAsync();
         }
 

@@ -1021,7 +1021,7 @@
         "IsRequired": false
       },
       {
-        "Name": "user",
+        "Name": "employeeId",
         "Type": "System.String",
         "IsRequired": false
       }
@@ -1048,6 +1048,11 @@
       },
       {
         "Name": "department",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "employeeId",
         "Type": "System.String",
         "IsRequired": false
       }
@@ -1078,33 +1083,7 @@
         "IsRequired": false
       },
       {
-        "Name": "user",
-        "Type": "System.String",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "AttendVisionReportsApi.Controllers.ReportsController",
-    "Method": "GetTimesheetUsers",
-    "RelativePath": "api/reports/timesheet/users",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "dateFrom",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "dateTo",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "dept",
+        "Name": "employeeId",
         "Type": "System.String",
         "IsRequired": false
       }

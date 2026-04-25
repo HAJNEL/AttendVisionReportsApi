@@ -4,7 +4,6 @@
     public record DepartmentInput(
         string DepartmentName,
         string? Manager,
-        decimal? PaymentRate,
         string? AddressLine1,
         string? AddressLine2,
         string? City,
@@ -12,10 +11,7 @@
         string? PostalCode,
         string? Country,
         string? SerialNo,
-        Guid? CompanyId,
-        decimal? OvertimePaymentRate,
-        string? OvertimeStartAfterTime,
-        string? CheckInOverrideTime
+        Guid? CompanyId
     );
 
 
@@ -23,7 +19,6 @@
         Guid Id,
         string DepartmentName,
         string? Manager,
-        double? PaymentRate,
         string? AddressLine1,
         string? AddressLine2,
         string? City,
@@ -32,9 +27,6 @@
         string? Country,
         string? SerialNo,
         Guid? CompanyId,
-        string? CompanyName,
-        double? OvertimePaymentRate,
-        string? OvertimeStartAfterTime,
-        string? CheckInOverrideTime
+        string? CompanyName
     );
 }

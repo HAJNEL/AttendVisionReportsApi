@@ -17,7 +17,6 @@ namespace AttendVisionReportsApi.Services
                  d.Id,
                  d.DepartmentName,
                  d.Manager,
-                 (double?)d.PaymentRate,
                  d.AddressLine1,
                  d.AddressLine2,
                  d.City,
@@ -26,10 +25,7 @@ namespace AttendVisionReportsApi.Services
                  d.Country,
                  d.SerialNo,
                  d.CompanyId,
-                 c != null ? c.Name : null,
-                 (double?)d.OvertimePaymentRate,
-                 d.OvertimeStartAfterTime.HasValue ? d.OvertimeStartAfterTime.Value.ToString(@"hh\:mm\:ss") : null,
-                 d.CheckInOverrideTime.HasValue ? d.CheckInOverrideTime.Value.ToString(@"hh\:mm\:ss") : null
+                 c != null ? c.Name : null
              )).ToListAsync();
 
         // Overload: filter by current user
@@ -53,7 +49,6 @@ namespace AttendVisionReportsApi.Services
                               d.Id,
                               d.DepartmentName,
                               d.Manager,
-                              (double?)d.PaymentRate,
                               d.AddressLine1,
                               d.AddressLine2,
                               d.City,
@@ -62,10 +57,7 @@ namespace AttendVisionReportsApi.Services
                               d.Country,
                               d.SerialNo,
                               d.CompanyId,
-                              c != null ? c.Name : null,
-                              (double?)d.OvertimePaymentRate,
-                              d.OvertimeStartAfterTime.HasValue ? d.OvertimeStartAfterTime.Value.ToString(@"hh\:mm\:ss") : null,
-                              d.CheckInOverrideTime.HasValue ? d.CheckInOverrideTime.Value.ToString(@"hh\:mm\:ss") : null
+                              c != null ? c.Name : null
                           )).ToListAsync();
         }
 
@@ -103,7 +95,6 @@ namespace AttendVisionReportsApi.Services
         {
             d.DepartmentName = i.DepartmentName;
             d.Manager = i.Manager;
-            d.PaymentRate = i.PaymentRate;
             d.AddressLine1 = i.AddressLine1;
             d.AddressLine2 = i.AddressLine2;
             d.City = i.City;
@@ -112,9 +103,6 @@ namespace AttendVisionReportsApi.Services
             d.Country = i.Country;
             d.SerialNo = i.SerialNo;
             d.CompanyId = i.CompanyId;
-            d.OvertimePaymentRate = i.OvertimePaymentRate;
-            d.OvertimeStartAfterTime = !string.IsNullOrWhiteSpace(i.OvertimeStartAfterTime) ? TimeSpan.Parse(i.OvertimeStartAfterTime) : null;
-            d.CheckInOverrideTime = !string.IsNullOrWhiteSpace(i.CheckInOverrideTime) ? TimeSpan.Parse(i.CheckInOverrideTime) : null;
             return d;
         }
 
@@ -123,7 +111,6 @@ namespace AttendVisionReportsApi.Services
                 d.Id,
                 d.DepartmentName,
                 d.Manager,
-                (double?)d.PaymentRate,
                 d.AddressLine1,
                 d.AddressLine2,
                 d.City,
@@ -132,10 +119,7 @@ namespace AttendVisionReportsApi.Services
                 d.Country,
                 d.SerialNo,
                 d.CompanyId,
-                companyName,
-                (double?)d.OvertimePaymentRate,
-                d.OvertimeStartAfterTime.HasValue ? d.OvertimeStartAfterTime.Value.ToString(@"hh\:mm\:ss") : null,
-                d.CheckInOverrideTime.HasValue ? d.CheckInOverrideTime.Value.ToString(@"hh\:mm\:ss") : null
+                companyName
             );
     }
 }
