@@ -248,6 +248,7 @@ namespace AttendVisionReportsApi.Services
               PersonKey = !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown"),
               x.Department,
               x.AccessDatetime,
+              x.AccessTime,
               x.AttendanceStatus
             })
             .ToListAsync();
@@ -265,30 +266,33 @@ namespace AttendVisionReportsApi.Services
 
             // Find when the break started (the last break_out not followed by break_in)
             DateTime? breakStart = null;
+            TimeOnly? breakAccessTime = null;
             for (int i = events.Count - 1; i >= 0; i--)
             {
               if (events[i].AttendanceStatus == "break_out")
               {
-                breakStart = events[i].AccessDatetime;
                 // Check if there is a break_in after this break_out
                 bool hasBreakIn = events.Skip(i + 1).Any(e => e.AttendanceStatus == "break_in");
                 if (!hasBreakIn)
+                {
+                  breakStart = events[i].AccessDatetime;
+                  breakAccessTime = events[i].AccessTime;
                   break;
-                else
-                  breakStart = null;
+                }
               }
             }
-            if (breakStart == null)
+            if (breakStart == null || breakAccessTime == null)
               continue;
 
-            var breakTimeAgo = (now - breakStart.Value).ToString(@"hh\:mm");
+            // Break Started: the actual access_time from the access_records row
+            var breakStarted = breakAccessTime.Value.ToString("HH:mm");
             var totalTimeOnBreak = (now - breakStart.Value).ToString(@"hh\:mm");
 
             result.Add(new OnBreakKpiDetail(
               group.Key.PersonKey,
               group.Key.Department ?? "Unknown",
               group.Key.PersonKey,
-              breakTimeAgo,
+              breakStarted,
               totalTimeOnBreak
             ));
           }

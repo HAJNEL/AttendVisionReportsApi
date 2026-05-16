@@ -8,6 +8,8 @@ namespace AttendVisionReportsApi.DTOs
         public string? LastName { get; set; }
         public bool IsActive { get; set; }
         public bool ResetPassword { get; set; }
+        public Guid? CompanyId { get; set; }
+        public string? CompanyName { get; set; }
         public List<RoleDto> Roles { get; set; } = new();
     }
 

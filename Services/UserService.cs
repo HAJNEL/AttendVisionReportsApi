@@ -74,22 +74,37 @@ namespace AttendVisionReportsApi.Services
                 .Include(ur => ur.Role)
                 .ToListAsync();
 
-            var result = users.Select(u => new UserDto
+            var userCompanies = await (
+                from du in db.DepartmentUsers
+                join d in db.Departments on du.DepartmentId equals d.Id
+                join c in db.Companies on d.CompanyId equals c.Id into companyJoin
+                from c in companyJoin.DefaultIfEmpty()
+                where userIds.Contains(du.UserId)
+                select new { du.UserId, d.CompanyId, CompanyName = c != null ? c.Name : null }
+            ).ToListAsync();
+
+            var result = users.Select(u =>
             {
-                Id = u.Id,
-                Email = u.Email,
-                FirstName = u.FirstName ?? string.Empty,
-                LastName = u.LastName ?? string.Empty,
-                IsActive = u.IsActive,
-                ResetPassword = u.ResetPassword,
-                Roles = userRoles
-                    .Where(ur => ur.UserId == u.Id)
-                    .Select(ur => new RoleDto
-                    {
-                        Id = ur.Role.Id,
-                        Name = ur.Role.Name,
-                        Description = ur.Role.Description
-                    }).ToList()
+                var company = userCompanies.FirstOrDefault(uc => uc.UserId == u.Id);
+                return new UserDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    IsActive = u.IsActive,
+                    ResetPassword = u.ResetPassword,
+                    CompanyId = company?.CompanyId,
+                    CompanyName = company?.CompanyName,
+                    Roles = userRoles
+                        .Where(ur => ur.UserId == u.Id)
+                        .Select(ur => new RoleDto
+                        {
+                            Id = ur.Role.Id,
+                            Name = ur.Role.Name,
+                            Description = ur.Role.Description
+                        }).ToList()
+                };
             });
             return result;
         }
@@ -109,6 +124,15 @@ namespace AttendVisionReportsApi.Services
                     Description = ur.Role.Description
                 }).ToListAsync();
 
+            var company = await (
+                from du in db.DepartmentUsers
+                join d in db.Departments on du.DepartmentId equals d.Id
+                join c in db.Companies on d.CompanyId equals c.Id into companyJoin
+                from c in companyJoin.DefaultIfEmpty()
+                where du.UserId == id
+                select new { d.CompanyId, CompanyName = c != null ? c.Name : null }
+            ).FirstOrDefaultAsync();
+
             return new UserDto
             {
                 Id = user.Id,
@@ -117,6 +141,8 @@ namespace AttendVisionReportsApi.Services
                 LastName = user.LastName ?? string.Empty,
                 IsActive = user.IsActive,
                 ResetPassword = user.ResetPassword,
+                CompanyId = company?.CompanyId,
+                CompanyName = company?.CompanyName,
                 Roles = roles
             };
         }
