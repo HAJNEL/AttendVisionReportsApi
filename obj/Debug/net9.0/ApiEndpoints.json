@@ -375,6 +375,53 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "AttendVisionReportsApi.Controllers.DepartmentPaymentRateSingleController",
+    "Method": "Update",
+    "RelativePath": "api/department-payment-rates/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "input",
+        "Type": "AttendVisionReportsApi.DTOs.DepartmentPaymentRateInput",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "AttendVisionReportsApi.DTOs.DepartmentPaymentRate",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "AttendVisionReportsApi.Controllers.DepartmentPaymentRateSingleController",
+    "Method": "Delete",
+    "RelativePath": "api/department-payment-rates/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "AttendVisionReportsApi.Controllers.DepartmentsController",
     "Method": "GetAllForUser",
     "RelativePath": "api/departments",
@@ -411,6 +458,63 @@
     "ReturnTypes": [
       {
         "Type": "AttendVisionReportsApi.DTOs.DepartmentResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "AttendVisionReportsApi.Controllers.DepartmentPaymentRatesController",
+    "Method": "GetRates",
+    "RelativePath": "api/departments/{departmentId}/payment-rates",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "departmentId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[AttendVisionReportsApi.DTOs.DepartmentPaymentRate, AttendVisionReportsApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "AttendVisionReportsApi.Controllers.DepartmentPaymentRatesController",
+    "Method": "Create",
+    "RelativePath": "api/departments/{departmentId}/payment-rates",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "departmentId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "input",
+        "Type": "AttendVisionReportsApi.DTOs.DepartmentPaymentRateInput",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "AttendVisionReportsApi.DTOs.DepartmentPaymentRate",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -1024,6 +1128,11 @@
         "Name": "employeeId",
         "Type": "System.String",
         "IsRequired": false
+      },
+      {
+        "Name": "employeeType",
+        "Type": "System.String",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -1055,6 +1164,47 @@
         "Name": "employeeId",
         "Type": "System.String",
         "IsRequired": false
+      },
+      {
+        "Name": "employeeType",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AttendVisionReportsApi.Controllers.ReportsController",
+    "Method": "GetSageTimesheet",
+    "RelativePath": "api/reports/sage-timesheet",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dateFrom",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "dateTo",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "dept",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "employeeId",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "employeeType",
+        "Type": "System.String",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -1084,6 +1234,11 @@
       },
       {
         "Name": "employeeId",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "employeeType",
         "Type": "System.String",
         "IsRequired": false
       }

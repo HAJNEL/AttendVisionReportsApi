@@ -11,7 +11,8 @@
         string? PostalCode,
         string? Country,
         string? SerialNo,
-        Guid? CompanyId
+        Guid? CompanyId,
+        string? CompanyCode
     );
 
 
@@ -27,6 +28,7 @@
         string? Country,
         string? SerialNo,
         Guid? CompanyId,
+        string? CompanyCode,
         string? CompanyName
     );
 }

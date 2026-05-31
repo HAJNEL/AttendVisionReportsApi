@@ -1,0 +1,44 @@
+﻿using AttendVisionReportsApi.DTOs;
+using AttendVisionReportsApi.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AttendVisionReportsApi.Controllers
+{
+    [ApiController, Route("api/departments/{departmentId}/payment-rates")]
+    public class DepartmentPaymentRatesController(DepartmentPaymentRateService service) : ControllerBase
+    {
+        [HttpGet]
+        public async Task<ActionResult<List<DepartmentPaymentRate>>> GetRates(string departmentId)
+        {
+            var rates = await service.GetByDepartmentAsync(departmentId);
+            return Ok(rates);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<DepartmentPaymentRate>> Create(string departmentId, DepartmentPaymentRateInput input)
+        {
+            var rate = await service.CreateAsync(departmentId, input);
+            return CreatedAtAction(nameof(GetRates), new { departmentId }, rate);
+        }
+    }
+
+    [ApiController, Route("api/department-payment-rates")]
+    public class DepartmentPaymentRateSingleController(DepartmentPaymentRateService service) : ControllerBase
+    {
+        [HttpPut("{id}")]
+        public async Task<ActionResult<DepartmentPaymentRate>> Update(Guid id, DepartmentPaymentRateInput input)
+        {
+            var rate = await service.UpdateAsync(id, input);
+            if (rate == null) return NotFound();
+            return Ok(rate);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var ok = await service.DeleteAsync(id);
+            if (!ok) return NotFound();
+            return NoContent();
+        }
+    }
+}

@@ -17,6 +17,7 @@
         [Column("country")] public string? Country { get; set; }
         [Column("serial_no")] public string? SerialNo { get; set; }
         [Column("companyid")] public Guid? CompanyId { get; set; }
+        [Column("company_code")] public string? CompanyCode { get; set; }
 
         // removed: overtime_payment_rate, overtime_start_after_time, check_in_override_time
     }

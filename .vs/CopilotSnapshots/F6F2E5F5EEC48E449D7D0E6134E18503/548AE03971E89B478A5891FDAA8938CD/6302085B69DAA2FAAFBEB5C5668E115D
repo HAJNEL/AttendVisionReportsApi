@@ -1,0 +1,141 @@
+﻿namespace AttendVisionReportsApi.Data
+{
+    using AttendVisionReportsApi.Models;
+    using Microsoft.EntityFrameworkCore;
+    using System.Collections.Generic;
+
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+    {
+        public DbSet<User> Users => Set<User>();
+        public DbSet<Role> Roles => Set<Role>();
+        public DbSet<UserRole> UserRoles => Set<UserRole>();
+        public DbSet<Department> Departments => Set<Department>();
+        public DbSet<AccessRecord> AccessRecords => Set<AccessRecord>();
+        public DbSet<Company> Companies => Set<Company>();
+        public DbSet<Permission> Permissions => Set<Permission>();
+        public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+        public DbSet<DepartmentUser> DepartmentUsers => Set<DepartmentUser>();
+        public DbSet<TimeOverride> TimeOverrides => Set<TimeOverride>();
+        public DbSet<EmployeeLeave> EmployeeLeaves => Set<EmployeeLeave>();
+        public DbSet<DepartmentPaymentRate> DepartmentPaymentRates => Set<DepartmentPaymentRate>();
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // EmployeeLeave configuration
+            modelBuilder.Entity<EmployeeLeave>()
+                .ToTable("employee_leave")
+                .HasKey(e => e.Id);
+
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.Type)
+                .HasColumnName("type");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.FromDate)
+                .HasColumnName("from_date");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.ToDate)
+                .HasColumnName("to_date");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.FromTime)
+                .HasColumnName("from_time");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.ToTime)
+                .HasColumnName("to_time");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.EmployeeId)
+                .HasColumnName("employee_id");
+            modelBuilder.Entity<EmployeeLeave>()
+                .Property(e => e.FullName)
+                .HasColumnName("full_name");
+            modelBuilder.Entity<EmployeeLeave>()
+                .HasOne<Department>()
+                .WithMany()
+                .HasForeignKey(e => e.DepartmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            base.OnModelCreating(modelBuilder);
+
+            // DepartmentUser configuration
+            modelBuilder.Entity<DepartmentUser>()
+                .ToTable("department_users")
+                .HasKey(du => du.Id);
+
+            modelBuilder.Entity<DepartmentUser>()
+                .HasIndex(du => new { du.DepartmentId, du.UserId })
+                .IsUnique();
+
+            modelBuilder.Entity<DepartmentUser>()
+                .HasOne(du => du.Department)
+                .WithMany()
+                .HasForeignKey(du => du.DepartmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DepartmentUser>()
+                .HasOne(du => du.User)
+                .WithMany()
+                .HasForeignKey(du => du.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Permission hierarchy
+            modelBuilder.Entity<Permission>()
+                .HasMany(p => p.Children)
+                .WithOne(p => p.Parent)
+                .HasForeignKey(p => p.ParentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // RolePermission PK is now Id (no composite key)
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Permission)
+                .WithMany(p => p.RolePermissions)
+                .HasForeignKey(rp => rp.PermissionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // TimeOverride configuration
+            modelBuilder.Entity<TimeOverride>()
+                .ToTable("time_overrides")
+                .HasKey(t => t.Id);
+
+            modelBuilder.Entity<TimeOverride>()
+                .HasOne(t => t.Department)
+                .WithMany()
+                .HasForeignKey(t => t.DepartmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TimeOverride>()
+                .Property(t => t.FromTime)
+                .HasColumnName("from_time");
+            modelBuilder.Entity<TimeOverride>()
+                .Property(t => t.ToTime)
+                .HasColumnName("to_time");
+            modelBuilder.Entity<TimeOverride>()
+                .Property(t => t.OverrideTime)
+                .HasColumnName("override_time");
+
+            // DepartmentPaymentRate configuration
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .ToTable("department_payment_rates")
+                .HasKey(r => r.Id);
+
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.RateType)
+                .HasColumnName("rate_type");
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.Amount)
+                .HasColumnName("amount");
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.CasualMatchKey)
+                .HasColumnName("casual_match_key");
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.AppliesTo)
+                .HasColumnName("applies_to");
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.DepartmentId)
+                .HasColumnName("department_id");
+        }
+    }
+}
