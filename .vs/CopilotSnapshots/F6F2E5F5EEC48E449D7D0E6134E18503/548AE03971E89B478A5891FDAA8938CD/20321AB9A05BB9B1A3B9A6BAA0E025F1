@@ -1,0 +1,29 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AttendVisionReportsApi.Models
+{
+    [Table("department_payment_rates")]
+    public class DepartmentPaymentRate
+    {
+        [Key]
+        [Column("id")]
+        public Guid Id { get; set; }
+
+        [Column("department_id")]
+        public string DepartmentId { get; set; } = string.Empty;
+
+        [Column("rate_type")]
+        public string RateType { get; set; } = string.Empty; // hourly, daily, monthly, overtime, custom
+
+        [Column("amount")]
+        public decimal Amount { get; set; }
+
+        [Column("casual_match_key")]
+        public string? CasualMatchKey { get; set; }
+
+        [Column("applies_to")]
+        public string AppliesTo { get; set; } = string.Empty; // standard, casual
+    }
+}

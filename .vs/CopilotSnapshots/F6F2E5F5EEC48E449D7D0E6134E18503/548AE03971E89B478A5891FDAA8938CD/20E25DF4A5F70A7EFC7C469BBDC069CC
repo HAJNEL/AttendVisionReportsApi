@@ -1,0 +1,20 @@
+﻿using System;
+
+namespace AttendVisionReportsApi.DTOs
+{
+    public record DepartmentPaymentRateInput(
+        string RateType,
+        decimal Amount,
+        string? CasualMatchKey,
+        string AppliesTo
+    );
+
+    public record DepartmentPaymentRate(
+        Guid Id,
+        string DepartmentId,
+        string RateType,
+        decimal Amount,
+        string? CasualMatchKey,
+        string AppliesTo
+    );
+}

@@ -244,6 +244,7 @@ namespace AttendVisionReportsApi.Services
                               d.Country,
                               d.SerialNo,
                               d.CompanyId,
+                              d.CompanyCode,
                               c != null ? c.Name : null
                           )).ToListAsync();
         }

@@ -17,6 +17,7 @@
         public DbSet<DepartmentUser> DepartmentUsers => Set<DepartmentUser>();
         public DbSet<TimeOverride> TimeOverrides => Set<TimeOverride>();
         public DbSet<EmployeeLeave> EmployeeLeaves => Set<EmployeeLeave>();
+        public DbSet<DepartmentPaymentRate> DepartmentPaymentRates => Set<DepartmentPaymentRate>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // EmployeeLeave configuration
@@ -114,6 +115,30 @@
             modelBuilder.Entity<TimeOverride>()
                 .Property(t => t.OverrideTime)
                 .HasColumnName("override_time");
+
+            // DepartmentPaymentRate configuration
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .ToTable("department_payment_rates")
+                .HasKey(r => r.Id);
+
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.RateType)
+                .HasColumnName("rate_type");
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.Amount)
+                .HasColumnName("amount");
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.MatchKey)
+                .HasColumnName("match_key");
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.OtherLabel)
+                .HasColumnName("other_label");
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.AppliesTo)
+                .HasColumnName("applies_to");
+            modelBuilder.Entity<DepartmentPaymentRate>()
+                .Property(r => r.DepartmentId)
+                .HasColumnName("department_id");
         }
     }
 }
