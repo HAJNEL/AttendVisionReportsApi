@@ -17,10 +17,7 @@ namespace AttendVisionReportsApi.Services
         }
 
 
-        public async Task<DashboardKpisResponse> GetKpisAsync(string dateFrom, string dateTo, string? department, string? employee)
-            => await GetKpisAsync(dateFrom, dateTo, department, employee, null);
-
-        public async Task<DashboardKpisResponse> GetKpisAsync(string dateFrom, string dateTo, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        public async Task<DashboardKpisResponse> GetKpisAsync(string dateFrom, string dateTo, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user = null)
         {
             var totalEmployeesDetails = await GetTotalEmployeesKpiDetailsAsync(dateFrom, dateTo, department, employee, user);
             var checkinsTodayDetails = await GetCheckinsTodayKpiDetailsAsync(dateFrom, dateTo, department, employee, user);
@@ -299,10 +296,7 @@ namespace AttendVisionReportsApi.Services
           return result;
         }
 
-        public async Task<IEnumerable<dynamic>> GetHourlyTrafficAsync(string date, string? department)
-          => await GetHourlyTrafficAsync(date, department, null);
-
-        public async Task<IEnumerable<dynamic>> GetHourlyTrafficAsync(string date, string? department, System.Security.Claims.ClaimsPrincipal? user)
+        public async Task<IEnumerable<dynamic>> GetHourlyTrafficAsync(string date, string? department, System.Security.Claims.ClaimsPrincipal? user = null)
         {
           var dateVal = DateOnly.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
@@ -326,10 +320,7 @@ namespace AttendVisionReportsApi.Services
           return result;
         }
 
-        public async Task<IEnumerable<dynamic>> GetMonthlyAttendanceAsync(string? department, string? employee)
-          => await GetMonthlyAttendanceAsync(department, employee, null);
-
-        public async Task<IEnumerable<dynamic>> GetMonthlyAttendanceAsync(string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        public async Task<IEnumerable<dynamic>> GetMonthlyAttendanceAsync(string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user = null)
         {
           var monthStart = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
 
@@ -352,10 +343,7 @@ namespace AttendVisionReportsApi.Services
           return result;
         }
 
-        public async Task<IEnumerable<dynamic>> GetDeptBreakdownAsync(string? department)
-          => await GetDeptBreakdownAsync(department, null);
-
-        public async Task<IEnumerable<dynamic>> GetDeptBreakdownAsync(string? department, System.Security.Claims.ClaimsPrincipal? user)
+        public async Task<IEnumerable<dynamic>> GetDeptBreakdownAsync(string? department, System.Security.Claims.ClaimsPrincipal? user = null)
         {
 
           var today = DateOnly.FromDateTime(DateTime.UtcNow.Date);
@@ -377,10 +365,7 @@ namespace AttendVisionReportsApi.Services
           return result;
         }
 
-        public async Task<IEnumerable<dynamic>> GetMonthlyTrafficAsync(int year, int month, string? department, string? employee)
-          => await GetMonthlyTrafficAsync(year, month, department, employee, null);
-
-        public async Task<IEnumerable<dynamic>> GetMonthlyTrafficAsync(int year, int month, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        public async Task<IEnumerable<dynamic>> GetMonthlyTrafficAsync(int year, int month, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user = null)
         {
           var dateStart = new DateOnly(year, month, 1);
           var dateEnd = dateStart.AddMonths(1);
@@ -404,10 +389,7 @@ namespace AttendVisionReportsApi.Services
           return result;
         }
 
-        public async Task<IEnumerable<dynamic>> GetYearlyTrafficAsync(int year, string? department, string? employee)
-          => await GetYearlyTrafficAsync(year, department, employee, null);
-
-        public async Task<IEnumerable<dynamic>> GetYearlyTrafficAsync(int year, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        public async Task<IEnumerable<dynamic>> GetYearlyTrafficAsync(int year, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user = null)
         {
           var dateStart = new DateOnly(year, 1, 1);
           var dateEnd = dateStart.AddYears(1);
@@ -431,10 +413,7 @@ namespace AttendVisionReportsApi.Services
           return result;
         }
 
-        public async Task<IEnumerable<dynamic>> GetDayEventsAsync(string date, string? department, string? employee)
-          => await GetDayEventsAsync(date, department, employee, null);
-
-        public async Task<IEnumerable<dynamic>> GetDayEventsAsync(string date, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        public async Task<IEnumerable<dynamic>> GetDayEventsAsync(string date, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user = null)
         {
           var dateVal = DateOnly.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
@@ -465,10 +444,7 @@ namespace AttendVisionReportsApi.Services
           return result;
         }
 
-        public async Task<IEnumerable<DayPersonRowResponse>> GetDayPeopleAsync(string date, string? department, string? employee)
-          => await GetDayPeopleAsync(date, department, employee, null);
-
-        public async Task<IEnumerable<DayPersonRowResponse>> GetDayPeopleAsync(string date, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user)
+        public async Task<IEnumerable<DayPersonRowResponse>> GetDayPeopleAsync(string date, string? department, string? employee, System.Security.Claims.ClaimsPrincipal? user = null)
         {
             var dateVal = DateOnly.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
@@ -551,22 +527,41 @@ namespace AttendVisionReportsApi.Services
         // Helper: get allowed departments for user
         private async Task<List<string>?> GetAllowedDepartmentsAsync(System.Security.Claims.ClaimsPrincipal? user, string? department)
         {
-            if (!string.IsNullOrEmpty(department))
-                return new List<string> { department };
-              if (user == null)
+            if (user == null)
+            {
+                if (!string.IsNullOrEmpty(department))
+                    return new List<string> { department };
                 return null;
-              if (!Helpers.ClaimsHelper.TryGetUserId(user, out var userId, logClaims: false))
-                return null;
+            }
+
+            if (!Helpers.ClaimsHelper.TryGetUserId(user, out var userId, logClaims: false))
+                return new List<string>();
+
             var departmentIds = await db.DepartmentUsers
                 .Where(du => du.UserId == userId)
                 .Select(du => du.DepartmentId)
                 .ToListAsync();
+
             if (!departmentIds.Any())
                 return new List<string>();
+
             var departmentNames = await db.Departments
                 .Where(d => departmentIds.Contains(d.Id))
                 .Select(d => d.DepartmentName)
                 .ToListAsync();
+
+            if (!string.IsNullOrEmpty(department))
+            {
+                if (departmentNames.Contains(department, StringComparer.OrdinalIgnoreCase))
+                {
+                    return new List<string> { department };
+                }
+                else
+                {
+                    return new List<string>();
+                }
+            }
+
             return departmentNames;
         }
     }

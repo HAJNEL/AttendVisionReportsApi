@@ -3,36 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|c:\\users\\hajne\\onedrive\\documents\\projects\\attendvisionreports\\attendvisionreportsapi\\services\\departmentpaymentrateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|solutionrelative:services\\departmentpaymentrateservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|c:\\users\\hajne\\onedrive\\documents\\projects\\attendvisionreports\\attendvisionreportsapi\\controllers\\departmentpaymentratescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|solutionrelative:controllers\\departmentpaymentratescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|c:\\users\\hajne\\onedrive\\documents\\projects\\attendvisionreports\\attendvisionreportsapi\\controllers\\reportscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|solutionrelative:controllers\\reportscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|c:\\users\\hajne\\onedrive\\documents\\projects\\attendvisionreports\\attendvisionreportsapi\\services\\reportsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|solutionrelative:services\\reportsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|c:\\users\\hajne\\onedrive\\documents\\projects\\attendvisionreports\\attendvisionreportsapi\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|solutionrelative:data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|c:\\users\\hajne\\onedrive\\documents\\projects\\attendvisionreports\\attendvisionreportsapi\\controllers\\departmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|solutionrelative:controllers\\departmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|c:\\users\\hajne\\onedrive\\documents\\projects\\attendvisionreports\\attendvisionreportsapi\\services\\departmentsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|solutionrelative:services\\departmentsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|c:\\users\\hajne\\onedrive\\documents\\projects\\attendvisionreports\\attendvisionreportsapi\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|solutionrelative:services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|c:\\users\\hajne\\onedrive\\documents\\projects\\attendvisionreports\\attendvisionreportsapi\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C6403CDC-5B2C-EA76-30AB-146ADA4409C6}|AttendVisionReportsApi.csproj|solutionrelative:controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,107 +18,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "DepartmentPaymentRatesController.cs",
-              "DocumentMoniker": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Controllers\\DepartmentPaymentRatesController.cs",
-              "RelativeDocumentMoniker": "Controllers\\DepartmentPaymentRatesController.cs",
-              "ToolTip": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Controllers\\DepartmentPaymentRatesController.cs",
-              "RelativeToolTip": "Controllers\\DepartmentPaymentRatesController.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAgwB4AAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-31T17:31:34.794Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ReportsService.cs",
-              "DocumentMoniker": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Services\\ReportsService.cs",
-              "RelativeDocumentMoniker": "Services\\ReportsService.cs",
-              "ToolTip": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Services\\ReportsService.cs",
-              "RelativeToolTip": "Services\\ReportsService.cs",
-              "ViewState": "AgIAABQAAAAAAAAAAIAwwBsAAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-31T16:48:29.424Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "DepartmentPaymentRateService.cs",
-              "DocumentMoniker": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Services\\DepartmentPaymentRateService.cs",
-              "RelativeDocumentMoniker": "Services\\DepartmentPaymentRateService.cs",
-              "ToolTip": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Services\\DepartmentPaymentRateService.cs",
-              "RelativeToolTip": "Services\\DepartmentPaymentRateService.cs",
-              "ViewState": "AgIAAE4AAAAAAAAAAAAgwFMAAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-30T14:01:10.519Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "AppDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Data\\AppDbContext.cs",
-              "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
-              "ToolTip": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Data\\AppDbContext.cs",
-              "RelativeToolTip": "Data\\AppDbContext.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAA3wBMAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-26T20:28:00.417Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "DepartmentsService.cs",
-              "DocumentMoniker": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Services\\DepartmentsService.cs",
-              "RelativeDocumentMoniker": "Services\\DepartmentsService.cs",
-              "ToolTip": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Services\\DepartmentsService.cs",
-              "RelativeToolTip": "Services\\DepartmentsService.cs",
-              "ViewState": "AgIAAFUAAAAAAAAAAAAkwGoAAAAmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-24T12:00:25.345Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "UserService.cs",
-              "DocumentMoniker": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Services\\UserService.cs",
-              "RelativeDocumentMoniker": "Services\\UserService.cs",
-              "ToolTip": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Services\\UserService.cs",
-              "RelativeToolTip": "Services\\UserService.cs",
-              "ViewState": "AgIAAK8AAAAAAAAAAAAnwPcAAAA3AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-24T07:28:42.957Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "DepartmentsController.cs",
-              "DocumentMoniker": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Controllers\\DepartmentsController.cs",
-              "RelativeDocumentMoniker": "Controllers\\DepartmentsController.cs",
-              "ToolTip": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Controllers\\DepartmentsController.cs",
-              "RelativeToolTip": "Controllers\\DepartmentsController.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAYwBkAAABbAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-24T11:58:25.711Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
               "Title": "ReportsController.cs",
               "DocumentMoniker": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Controllers\\ReportsController.cs",
               "RelativeDocumentMoniker": "Controllers\\ReportsController.cs",
               "ToolTip": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Controllers\\ReportsController.cs",
               "RelativeToolTip": "Controllers\\ReportsController.cs",
-              "ViewState": "AgIAAD0AAAAAAAAAAAAwwFIAAAAQAAAAAAAAAA==",
+              "ViewState": "AgIAAA0AAAAAAAAAAAASwBMAAABdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-23T11:43:36.807Z",
+              "WhenOpened": "2026-06-02T07:15:57.545Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "DashboardController.cs",
+              "DocumentMoniker": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Controllers\\DashboardController.cs",
+              "RelativeDocumentMoniker": "Controllers\\DashboardController.cs",
+              "ToolTip": "C:\\Users\\hajne\\OneDrive\\Documents\\Projects\\AttendVisionReports\\AttendVisionReportsApi\\Controllers\\DashboardController.cs",
+              "RelativeToolTip": "Controllers\\DashboardController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA0AAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T09:21:24.98Z",
               "EditorCaption": ""
             }
           ]
