@@ -1,5 +1,6 @@
 using AttendVisionReportsApi.Data;
 using AttendVisionReportsApi.Services;
+using AttendVisionReportsApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -58,6 +59,7 @@ public partial class Program
         builder.Services.AddScoped<IFilterService, FilterService>();
         builder.Services.AddScoped<ITimeOverrideService, TimeOverrideService>();
         builder.Services.AddScoped<IEmployeeLeaveService, EmployeeLeaveService>();
+        builder.Services.AddScoped<ITimeManagementService, TimeManagementService>();
 
         // Department Payment Rate Service
         builder.Services.AddScoped<DepartmentPaymentRateService>();

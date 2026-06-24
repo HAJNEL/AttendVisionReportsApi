@@ -18,6 +18,7 @@
         public DbSet<TimeOverride> TimeOverrides => Set<TimeOverride>();
         public DbSet<EmployeeLeave> EmployeeLeaves => Set<EmployeeLeave>();
         public DbSet<DepartmentPaymentRate> DepartmentPaymentRates => Set<DepartmentPaymentRate>();
+        public DbSet<TimeManagementConfig> TimeManagementConfigs => Set<TimeManagementConfig>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // EmployeeLeave configuration
@@ -139,6 +140,21 @@
             modelBuilder.Entity<DepartmentPaymentRate>()
                 .Property(r => r.DepartmentId)
                 .HasColumnName("department_id");
+
+            // TimeManagementConfig configuration (column names mapped via attributes)
+            modelBuilder.Entity<TimeManagementConfig>()
+                .ToTable("time_management_config")
+                .HasKey(c => c.Id);
+
+            modelBuilder.Entity<TimeManagementConfig>()
+                .HasIndex(c => c.CompanyId)
+                .IsUnique();
+
+            modelBuilder.Entity<TimeManagementConfig>()
+                .HasOne<Company>()
+                .WithMany()
+                .HasForeignKey(c => c.CompanyId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
