@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AttendVisionReportsApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9295dd37fb31bbfcd61c7a3e4ab6f27bf7b92494")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5023e5cb9e95d7e65c5a85e2d6eb1983b3dab4db")]
 [assembly: System.Reflection.AssemblyProductAttribute("AttendVisionReportsApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AttendVisionReportsApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

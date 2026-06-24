@@ -15,7 +15,7 @@ namespace AttendVisionReportsApi.Models
         public Guid DepartmentId { get; set; }
 
         [Column("rate_type")]
-        public string RateType { get; set; } = string.Empty; // hourly, daily, monthly, overtime, custom
+        public string RateType { get; set; } = string.Empty; // standard, public_holiday
 
         [Column("amount")]
         public decimal Amount { get; set; }
