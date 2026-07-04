@@ -36,7 +36,15 @@ namespace AttendVisionReportsApi.Services
             }
             query = query.Where(x => !string.IsNullOrWhiteSpace(x.PersonName) && !string.IsNullOrWhiteSpace(x.EmployeeId) && !string.IsNullOrWhiteSpace(x.Department));
 
+            // Get the latest AccessDatetime per EmployeeId so we use the most recent name
+            var latestPerEmployee = query
+                .GroupBy(ar => ar.EmployeeId)
+                .Select(g => new { EmployeeId = g.Key, MaxDatetime = g.Max(ar => ar.AccessDatetime) });
+
             var result = await (from ar in query
+                                join latest in latestPerEmployee
+                                    on new { ar.EmployeeId, ar.AccessDatetime }
+                                    equals new { latest.EmployeeId, AccessDatetime = latest.MaxDatetime }
                                 join d in _context.Departments on ar.Department equals d.DepartmentName
                                 select new EmployeeResult
                                 {
