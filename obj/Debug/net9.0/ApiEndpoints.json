@@ -1139,6 +1139,32 @@
   },
   {
     "ContainingType": "AttendVisionReportsApi.Controllers.ReportsController",
+    "Method": "GetReportConfig",
+    "RelativePath": "api/reports/config",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AttendVisionReportsApi.Controllers.ReportsController",
+    "Method": "SaveReportConfig",
+    "RelativePath": "api/reports/config",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "AttendVisionReportsApi.DTOs.ReportConfigDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AttendVisionReportsApi.Controllers.ReportsController",
     "Method": "GetIssues",
     "RelativePath": "api/reports/issues",
     "HttpMethod": "GET",

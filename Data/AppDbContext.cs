@@ -19,6 +19,7 @@
         public DbSet<EmployeeLeave> EmployeeLeaves => Set<EmployeeLeave>();
         public DbSet<DepartmentPaymentRate> DepartmentPaymentRates => Set<DepartmentPaymentRate>();
         public DbSet<TimeManagementConfig> TimeManagementConfigs => Set<TimeManagementConfig>();
+        public DbSet<ReportConfig> ReportConfigs => Set<ReportConfig>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // EmployeeLeave configuration
@@ -151,6 +152,21 @@
                 .IsUnique();
 
             modelBuilder.Entity<TimeManagementConfig>()
+                .HasOne<Company>()
+                .WithMany()
+                .HasForeignKey(c => c.CompanyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ReportConfig configuration (column names mapped via attributes)
+            modelBuilder.Entity<ReportConfig>()
+                .ToTable("report_config")
+                .HasKey(c => c.Id);
+
+            modelBuilder.Entity<ReportConfig>()
+                .HasIndex(c => c.CompanyId)
+                .IsUnique();
+
+            modelBuilder.Entity<ReportConfig>()
                 .HasOne<Company>()
                 .WithMany()
                 .HasForeignKey(c => c.CompanyId)

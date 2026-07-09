@@ -1,3 +1,4 @@
+using AttendVisionReportsApi.DTOs;
 using AttendVisionReportsApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -81,6 +82,46 @@ namespace AttendVisionReportsApi.Controllers
                     return Unauthorized(new { error = "No valid user ID found in claims." });
                 }
                 return Ok(await reportsService.GetSageTimesheetAsync(dateFrom, dateTo, dept, employeeId, employeeType, userId));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("config")]
+        public async Task<IActionResult> GetReportConfig()
+        {
+            try
+            {
+                Guid userId;
+                if (!Helpers.ClaimsHelper.TryGetUserId(User, out userId))
+                {
+                    return Unauthorized(new { error = "No valid user ID found in claims." });
+                }
+                return Ok(await reportsService.GetReportConfigAsync(userId));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPut("config")]
+        public async Task<IActionResult> SaveReportConfig([FromBody] ReportConfigDto dto)
+        {
+            try
+            {
+                Guid userId;
+                if (!Helpers.ClaimsHelper.TryGetUserId(User, out userId))
+                {
+                    return Unauthorized(new { error = "No valid user ID found in claims." });
+                }
+                return Ok(await reportsService.SaveReportConfigAsync(dto, userId));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {

@@ -1,11 +1,14 @@
 using System.Globalization;
+using AttendVisionReportsApi.Data;
 using AttendVisionReportsApi.DTOs;
+using AttendVisionReportsApi.Models;
 using Dapper;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace AttendVisionReportsApi.Services
 {
-    public class ReportsService(NpgsqlDataSource dataSource) : IReportsService
+    public class ReportsService(NpgsqlDataSource dataSource, AppDbContext context) : IReportsService
     {
 
     public async Task<IEnumerable<dynamic>> GetIssuesAsync(string dateFrom, string dateTo, string? department, string? employeeId, string? employeeType, Guid userId)
@@ -75,5 +78,66 @@ namespace AttendVisionReportsApi.Services
           };
           return await Helpers.PgFunctionHelper.CallFunctionAsync<dynamic>(conn, "get_sage_timesheet", parameters);
         }
+
+        // ── Report period config ──────────────────────────────────────────────
+
+        public async Task<ReportConfigDto> GetReportConfigAsync(Guid userId)
+        {
+            var entity = await GetConfigEntityAsync(userId);
+            return MapConfigToDto(entity);
+        }
+
+        public async Task<ReportConfigDto> SaveReportConfigAsync(ReportConfigDto dto, Guid userId)
+        {
+            var companyId = await ResolveCompanyIdAsync(userId)
+                ?? throw new InvalidOperationException("No company is linked to the current user.");
+
+            var entity = await context.ReportConfigs
+                .FirstOrDefaultAsync(c => c.CompanyId == companyId);
+
+            if (entity == null)
+            {
+                entity = new ReportConfig { Id = Guid.NewGuid(), CompanyId = companyId };
+                context.ReportConfigs.Add(entity);
+            }
+
+            entity.MonthStartDay = dto.MonthStartDay;
+            entity.MonthEndDay = dto.MonthEndDay;
+            entity.UpdatedAt = DateTime.UtcNow;
+
+            await context.SaveChangesAsync();
+            return MapConfigToDto(entity);
+        }
+
+        private async Task<ReportConfig> GetConfigEntityAsync(Guid userId)
+        {
+            var companyId = await ResolveCompanyIdAsync(userId);
+            if (companyId == null) return new ReportConfig { CompanyId = Guid.Empty };
+
+            var entity = await context.ReportConfigs
+                .FirstOrDefaultAsync(c => c.CompanyId == companyId.Value);
+            return entity ?? new ReportConfig { CompanyId = companyId.Value };
+        }
+
+        private async Task<Guid?> ResolveCompanyIdAsync(Guid userId)
+        {
+            var deptIds = await context.DepartmentUsers
+                .Where(du => du.UserId == userId)
+                .Select(du => du.DepartmentId)
+                .ToListAsync();
+
+            if (deptIds.Count == 0) return null;
+
+            return await context.Departments
+                .Where(d => deptIds.Contains(d.Id) && d.CompanyId != null)
+                .Select(d => d.CompanyId)
+                .FirstOrDefaultAsync();
+        }
+
+        private static ReportConfigDto MapConfigToDto(ReportConfig c) => new(
+            c.CompanyId == Guid.Empty ? null : c.CompanyId,
+            c.MonthStartDay,
+            c.MonthEndDay
+        );
     }
 }
