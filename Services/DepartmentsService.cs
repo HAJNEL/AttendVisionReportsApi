@@ -26,7 +26,8 @@ namespace AttendVisionReportsApi.Services
                  d.SerialNo,
                  d.CompanyId,
                  d.CompanyCode,
-                 c != null ? c.Name : null
+                 c != null ? c.Name : null,
+                 d.HikCentralOrgIndexCode
              )).ToListAsync();
 
         // Overload: filter by current user
@@ -59,13 +60,18 @@ namespace AttendVisionReportsApi.Services
                               d.SerialNo,
                               d.CompanyId,
                               d.CompanyCode,
-                              c != null ? c.Name : null
+                              c != null ? c.Name : null,
+                              d.HikCentralOrgIndexCode
                           )).ToListAsync();
         }
 
 
         public async Task<DepartmentResponse> CreateAsync(DepartmentInput input)
         {
+            if (await IsDuplicateAsync(input.DepartmentName, input.SerialNo))
+                throw new InvalidOperationException(
+                    $"A department named '{input.DepartmentName}' with serial number '{input.SerialNo}' already exists.");
+
             var dept = Apply(new Department(), input);
             db.Departments.Add(dept);
             await db.SaveChangesAsync();
@@ -78,11 +84,22 @@ namespace AttendVisionReportsApi.Services
         {
             var dept = await db.Departments.FindAsync(id);
             if (dept is null) return null;
+
+            if (await IsDuplicateAsync(input.DepartmentName, input.SerialNo, id))
+                throw new InvalidOperationException(
+                    $"A department named '{input.DepartmentName}' with serial number '{input.SerialNo}' already exists.");
+
             Apply(dept, input);
             await db.SaveChangesAsync();
             var companyName = dept.CompanyId != null ? await db.Companies.Where(c => c.Id == dept.CompanyId).Select(c => c.Name).FirstOrDefaultAsync() : null;
             return Map(dept, companyName);
         }
+
+        private Task<bool> IsDuplicateAsync(string departmentName, string? serialNo, Guid? excludeId = null) =>
+            db.Departments.AnyAsync(d =>
+                d.DepartmentName == departmentName &&
+                d.SerialNo == serialNo &&
+                (excludeId == null || d.Id != excludeId));
 
         public async Task<bool> DeleteAsync(Guid id)
         {
@@ -106,6 +123,7 @@ namespace AttendVisionReportsApi.Services
             d.SerialNo = i.SerialNo;
             d.CompanyId = i.CompanyId;
             d.CompanyCode = i.CompanyCode;
+            d.HikCentralOrgIndexCode = i.HikCentralOrgIndexCode;
             return d;
         }
 
@@ -123,7 +141,8 @@ namespace AttendVisionReportsApi.Services
                 d.SerialNo,
                 d.CompanyId,
                 d.CompanyCode,
-                companyName
+                companyName,
+                d.HikCentralOrgIndexCode
             );
     }
 }

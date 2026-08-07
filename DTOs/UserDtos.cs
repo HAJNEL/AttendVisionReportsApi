@@ -10,6 +10,7 @@ namespace AttendVisionReportsApi.DTOs
         public bool ResetPassword { get; set; }
         public Guid? CompanyId { get; set; }
         public string? CompanyName { get; set; }
+        public string? PhotoBase64 { get; set; }
         public List<RoleDto> Roles { get; set; } = new();
     }
 
@@ -33,4 +34,6 @@ namespace AttendVisionReportsApi.DTOs
         public bool? ResetPassword { get; set; }
         public List<Guid> Roles { get; set; } = new();
     }
+
+    public record UpdatePhotoRequest(string? PhotoBase64);
 }

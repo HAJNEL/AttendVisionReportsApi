@@ -19,5 +19,7 @@
         public bool IsActive { get; set; } = true;
         [Column("reset_password")]
         public bool ResetPassword { get; set; } = true;
+        [Column("photo_base64")]
+        public string? PhotoBase64 { get; set; }
     }
 }

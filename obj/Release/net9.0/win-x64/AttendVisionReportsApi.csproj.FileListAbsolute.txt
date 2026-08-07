@@ -132,3 +132,4 @@ C:\Users\hajne\OneDrive\Documents\Projects\AttendVisionReports\AttendVisionRepor
 C:\Users\hajne\OneDrive\Documents\Projects\AttendVisionReports\AttendVisionReportsApi\obj\Release\net9.0\win-x64\AttendVisionReportsApi.pdb
 C:\Users\hajne\OneDrive\Documents\Projects\AttendVisionReports\AttendVisionReportsApi\obj\Release\net9.0\win-x64\AttendVisionReportsApi.genruntimeconfig.cache
 C:\Users\hajne\OneDrive\Documents\Projects\AttendVisionReports\AttendVisionReportsApi\obj\Release\net9.0\win-x64\ref\AttendVisionReportsApi.dll
+C:\Users\hajne\OneDrive\Documents\Projects\AttendVisionReports\AttendVisionReportsApi\bin\Release\net9.0\win-x64\Microsoft.Bcl.Cryptography.dll

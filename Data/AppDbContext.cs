@@ -20,6 +20,9 @@
         public DbSet<DepartmentPaymentRate> DepartmentPaymentRates => Set<DepartmentPaymentRate>();
         public DbSet<TimeManagementConfig> TimeManagementConfigs => Set<TimeManagementConfig>();
         public DbSet<ReportConfig> ReportConfigs => Set<ReportConfig>();
+        public DbSet<Employee> Employees => Set<Employee>();
+        public DbSet<EmployeeAccessLevel> EmployeeAccessLevels => Set<EmployeeAccessLevel>();
+        public DbSet<ImpersonationEvent> ImpersonationEvents => Set<ImpersonationEvent>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // EmployeeLeave configuration
@@ -171,6 +174,36 @@
                 .WithMany()
                 .HasForeignKey(c => c.CompanyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Employee configuration
+            modelBuilder.Entity<Employee>()
+                .ToTable("employees")
+                .HasKey(e => e.Id);
+
+            modelBuilder.Entity<Employee>()
+                .HasIndex(e => e.HikCentralPersonId)
+                .IsUnique();
+
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.Department)
+                .WithMany()
+                .HasForeignKey(e => e.DepartmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<EmployeeAccessLevel>()
+                .ToTable("employee_access_levels")
+                .HasKey(a => a.Id);
+
+            modelBuilder.Entity<EmployeeAccessLevel>()
+                .HasOne<Employee>()
+                .WithMany()
+                .HasForeignKey(a => a.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ImpersonationEvent configuration
+            modelBuilder.Entity<ImpersonationEvent>()
+                .ToTable("impersonation_events")
+                .HasKey(e => e.Id);
         }
     }
 }

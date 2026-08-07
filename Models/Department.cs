@@ -18,6 +18,7 @@
         [Column("serial_no")] public string? SerialNo { get; set; }
         [Column("companyid")] public Guid? CompanyId { get; set; }
         [Column("company_code")] public string? CompanyCode { get; set; }
+        [Column("hikcentral_org_index_code")] public string? HikCentralOrgIndexCode { get; set; }
 
         // removed: overtime_payment_rate, overtime_start_after_time, check_in_override_time
     }

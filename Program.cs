@@ -1,10 +1,12 @@
 using AttendVisionReportsApi.Data;
 using AttendVisionReportsApi.Services;
+using AttendVisionReportsApi.Services.HikCentral;
 using AttendVisionReportsApi.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using System.Linq;
 using System.Text;
 
 public partial class Program
@@ -60,6 +62,7 @@ public partial class Program
         builder.Services.AddScoped<ITimeOverrideService, TimeOverrideService>();
         builder.Services.AddScoped<IEmployeeLeaveService, EmployeeLeaveService>();
         builder.Services.AddScoped<ITimeManagementService, TimeManagementService>();
+        builder.Services.AddScoped<IEmployeeSyncService, EmployeeSyncService>();
 
         // Department Payment Rate Service
         builder.Services.AddScoped<DepartmentPaymentRateService>();
@@ -67,9 +70,29 @@ public partial class Program
         // Health Check Service
         builder.Services.AddScoped<IHealthCheckService, HealthCheckService>();
 
+        // HikCentral OpenAPI (Artemis) Integration
+        builder.Services.AddTransient<ArtemisSigningHandler>();
+        builder.Services.AddHttpClient<IHikCentralService, HikCentralService>(client =>
+        {
+            var baseUrl = builder.Configuration["HikCentral:BaseUrl"];
+            if (!string.IsNullOrEmpty(baseUrl))
+                client.BaseAddress = new Uri(baseUrl);
+        })
+        .AddHttpMessageHandler<ArtemisSigningHandler>()
+        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = builder.Configuration.GetValue<bool>("HikCentral:AllowInvalidCertificate")
+                ? (_, _, _, _) => true
+                : null
+        });
+
         // CORS Policy Configuration
         var allowedOriginsString = builder.Configuration["CorsSettings:AllowedOrigins"];
-        var allowedOrigins = (allowedOriginsString ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var allowedOrigins = (allowedOriginsString ?? "")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(o => o.Trim())
+            .ToArray();
+        var isDevelopment = builder.Environment.IsDevelopment();
 
         builder.Services.AddCors(options =>
         {
@@ -77,7 +100,13 @@ public partial class Program
             {
                 if (allowedOrigins.Length > 0)
                 {
-                    policy.WithOrigins(allowedOrigins)
+                    // In Development, also allow any VS Code dev tunnel origin (e.g. https://xxxx-4200.devtunnels.ms)
+                    // so port-forwarded testing works without editing config every time a new tunnel is created.
+                    policy.SetIsOriginAllowed(origin =>
+                              allowedOrigins.Contains(origin) ||
+                              (isDevelopment &&
+                               Uri.TryCreate(origin, UriKind.Absolute, out var originUri) &&
+                               originUri.Host.EndsWith(".devtunnels.ms", StringComparison.OrdinalIgnoreCase)))
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();

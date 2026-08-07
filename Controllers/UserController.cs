@@ -20,6 +20,30 @@ namespace AttendVisionReportsApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAll() => Ok(await _userService.GetAllAsync());
 
+        [HttpGet("by-company/{companyId}")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersByCompany(Guid companyId) =>
+            Ok(await _userService.GetUsersForCompanyAsync(companyId));
+
+        [HttpGet("me")]
+        public async Task<ActionResult<UserDto>> GetMe()
+        {
+            if (!Helpers.ClaimsHelper.TryGetUserId(User, out var userId, logClaims: false))
+                return Unauthorized();
+            var user = await _userService.GetByIdAsync(userId);
+            if (user == null) return NotFound();
+            return Ok(user);
+        }
+
+        [HttpPut("me/photo")]
+        public async Task<ActionResult<UserDto>> UpdateMyPhoto([FromBody] UpdatePhotoRequest req)
+        {
+            if (!Helpers.ClaimsHelper.TryGetUserId(User, out var userId, logClaims: false))
+                return Unauthorized();
+            var user = await _userService.UpdatePhotoAsync(userId, req.PhotoBase64);
+            if (user == null) return NotFound();
+            return Ok(user);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetById(Guid id)
         {

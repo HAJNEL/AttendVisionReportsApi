@@ -143,6 +143,7 @@ namespace AttendVisionReportsApi.Services
                 ResetPassword = user.ResetPassword,
                 CompanyId = company?.CompanyId,
                 CompanyName = company?.CompanyName,
+                PhotoBase64 = user.PhotoBase64,
                 Roles = roles
             };
         }
@@ -212,6 +213,15 @@ namespace AttendVisionReportsApi.Services
             return await GetByIdAsync(user.Id);
         }
 
+        public async Task<UserDto?> UpdatePhotoAsync(Guid id, string? photoBase64)
+        {
+            var user = await db.Users.FindAsync(id);
+            if (user == null) return null;
+            user.PhotoBase64 = photoBase64;
+            await db.SaveChangesAsync();
+            return await GetByIdAsync(id);
+        }
+
         public async Task<bool> DeleteAsync(Guid id)
         {
             var user = await db.Users.FindAsync(id);
@@ -245,7 +255,8 @@ namespace AttendVisionReportsApi.Services
                               d.SerialNo,
                               d.CompanyId,
                               d.CompanyCode,
-                              c != null ? c.Name : null
+                              c != null ? c.Name : null,
+                              d.HikCentralOrgIndexCode
                           )).ToListAsync();
         }
 
@@ -266,5 +277,72 @@ namespace AttendVisionReportsApi.Services
                 Roles = new List<RoleDto>() // Optionally populate roles if needed
             });
         }
+
+        // Users reachable for the "log in as" admin picker - one company can
+        // span several departments, and admins/inactive accounts are
+        // excluded here (not just at impersonation time) so nothing shown
+        // in the picker can ever be rejected by ImpersonateAsync.
+        public async Task<IEnumerable<UserDto>> GetUsersForCompanyAsync(Guid companyId)
+        {
+            var userIds = await (
+                from du in db.DepartmentUsers
+                join d in db.Departments on du.DepartmentId equals d.Id
+                where d.CompanyId == companyId
+                select du.UserId
+            ).Distinct().ToListAsync();
+
+            if (userIds.Count == 0) return Enumerable.Empty<UserDto>();
+
+            var adminUserIds = (await GetAdminUserIdsAsync(userIds)).ToHashSet();
+
+            var users = await db.Users
+                .Where(u => userIds.Contains(u.Id) && u.IsActive)
+                .ToListAsync();
+
+            var userRoles = await db.UserRoles
+                .Where(ur => userIds.Contains(ur.UserId))
+                .Include(ur => ur.Role)
+                .ToListAsync();
+
+            return users
+                .Where(u => !adminUserIds.Contains(u.Id) && !string.Equals(u.Username, "admin", StringComparison.OrdinalIgnoreCase))
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName ?? string.Empty,
+                    LastName = u.LastName ?? string.Empty,
+                    IsActive = u.IsActive,
+                    ResetPassword = u.ResetPassword,
+                    Roles = userRoles
+                        .Where(ur => ur.UserId == u.Id)
+                        .Select(ur => new RoleDto { Id = ur.Role.Id, Name = ur.Role.Name, Description = ur.Role.Description })
+                        .ToList()
+                });
+        }
+
+        public async Task<bool> IsAdminAsync(Guid userId)
+        {
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return false;
+            if (string.Equals(user.Username, "admin", StringComparison.OrdinalIgnoreCase)) return true;
+
+            var adminIds = await GetAdminUserIdsAsync(new List<Guid> { userId });
+            return adminIds.Contains(userId);
+        }
+
+        // Shared by IsAdminAsync (single user) and GetUsersForCompanyAsync
+        // (bulk) - "admin" here means holding the admin_dashboard
+        // permission via any assigned role, matching the frontend's
+        // computeIsAdmin (minus its dead 'role-admin' literal check, which
+        // has no real backend equivalent).
+        private async Task<List<Guid>> GetAdminUserIdsAsync(List<Guid> candidateUserIds) =>
+            await (
+                from ur in db.UserRoles
+                join rp in db.RolePermissions on ur.RoleId equals rp.RoleId
+                join p in db.Permissions on rp.PermissionId equals p.Id
+                where candidateUserIds.Contains(ur.UserId) && p.UniqueCode != null && p.UniqueCode.ToLower() == "admin_dashboard"
+                select ur.UserId
+            ).Distinct().ToListAsync();
     }
 }

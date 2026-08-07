@@ -15,10 +15,10 @@ namespace AttendVisionReportsApi.Services
 
         public async Task<IEnumerable<EmployeeResult>> GetDepartmentEmployeesAsync(Guid? departmentId, System.Security.Claims.ClaimsPrincipal? user = null)
         {
-            var query = _context.AccessRecords.AsQueryable();
+            var query = _context.Employees.AsQueryable();
             if (departmentId.HasValue)
             {
-                query = query.Where(x => x.Department != null && _context.Departments.Any(d => d.Id == departmentId.Value && d.DepartmentName == x.Department));
+                query = query.Where(e => e.DepartmentId == departmentId.Value);
             }
             else if (user != null && Helpers.ClaimsHelper.TryGetUserId(user, out var userId, logClaims: false))
             {
@@ -27,34 +27,20 @@ namespace AttendVisionReportsApi.Services
                     .Select(du => du.DepartmentId)
                     .ToListAsync();
 
-                var departmentNames = await _context.Departments
-                    .Where(d => departmentIds.Contains(d.Id))
-                    .Select(d => d.DepartmentName)
-                    .ToListAsync();
-
-                query = query.Where(x => !string.IsNullOrEmpty(x.Department) && departmentNames.Contains(x.Department));
+                query = query.Where(e => e.DepartmentId != null && departmentIds.Contains(e.DepartmentId.Value));
             }
-            query = query.Where(x => !string.IsNullOrWhiteSpace(x.PersonName) && !string.IsNullOrWhiteSpace(x.EmployeeId) && !string.IsNullOrWhiteSpace(x.Department));
 
-            // Get the latest AccessDatetime per EmployeeId so we use the most recent name
-            var latestPerEmployee = query
-                .GroupBy(ar => ar.EmployeeId)
-                .Select(g => new { EmployeeId = g.Key, MaxDatetime = g.Max(ar => ar.AccessDatetime) });
-
-            var result = await (from ar in query
-                                join latest in latestPerEmployee
-                                    on new { ar.EmployeeId, ar.AccessDatetime }
-                                    equals new { latest.EmployeeId, AccessDatetime = latest.MaxDatetime }
-                                join d in _context.Departments on ar.Department equals d.DepartmentName
-                                select new EmployeeResult
-                                {
-                                    DepartmentId = d.Id.ToString(),
-                                    Name = ar.PersonName,
-                                    EmployeeId = ar.EmployeeId
-                                })
-                                .Distinct()
-                                .OrderBy(x => x.Name)
-                                .ToListAsync();
+            var result = await query
+                .Where(e => !string.IsNullOrWhiteSpace(e.FullName) && !string.IsNullOrWhiteSpace(e.EmployeeNo))
+                .Select(e => new EmployeeResult
+                {
+                    DepartmentId = e.DepartmentId != null ? e.DepartmentId.ToString() : null,
+                    Name = e.FullName,
+                    EmployeeId = e.EmployeeNo
+                })
+                .Distinct()
+                .OrderBy(x => x.Name)
+                .ToListAsync();
             return result;
         }
 

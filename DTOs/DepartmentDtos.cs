@@ -12,7 +12,8 @@
         string? Country,
         string? SerialNo,
         Guid? CompanyId,
-        string? CompanyCode
+        string? CompanyCode,
+        string? HikCentralOrgIndexCode
     );
 
 
@@ -29,6 +30,7 @@
         string? SerialNo,
         Guid? CompanyId,
         string? CompanyCode,
-        string? CompanyName
+        string? CompanyName,
+        string? HikCentralOrgIndexCode
     );
 }

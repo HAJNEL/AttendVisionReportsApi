@@ -17,17 +17,31 @@ namespace AttendVisionReportsApi.Controllers
         [HttpPost]
         public async Task<ActionResult<DepartmentResponse>> Create(DepartmentInput input)
         {
-            var dept = await departmentsService.CreateAsync(input);
-            return CreatedAtAction(nameof(GetAll), dept);
+            try
+            {
+                var dept = await departmentsService.CreateAsync(input);
+                return CreatedAtAction(nameof(GetAll), dept);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
 
         [HttpPut("{id}")]
         public async Task<ActionResult<DepartmentResponse>> Update(Guid id, DepartmentInput input)
         {
-            var dept = await departmentsService.UpdateAsync(id, input);
-            if (dept is null) return NotFound();
-            return Ok(dept);
+            try
+            {
+                var dept = await departmentsService.UpdateAsync(id, input);
+                if (dept is null) return NotFound();
+                return Ok(dept);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
