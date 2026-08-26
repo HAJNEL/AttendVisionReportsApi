@@ -17,5 +17,6 @@ namespace AttendVisionReportsApi.Services
         Task<IEnumerable<UserDto>> GetUsersForDepartmentAsync(Guid departmentId);
         Task<IEnumerable<UserDto>> GetUsersForCompanyAsync(Guid companyId);
         Task<bool> IsAdminAsync(Guid userId);
+        Task<bool> HasPermissionAsync(Guid userId, string uniqueCode);
     }
 }

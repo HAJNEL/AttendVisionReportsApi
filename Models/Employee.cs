@@ -26,7 +26,9 @@ namespace AttendVisionReportsApi.Models
         [Column("current_shift_on_duty")] public string? CurrentShiftOnDuty { get; set; }
         [Column("current_shift_off_duty")] public string? CurrentShiftOffDuty { get; set; }
         [Column("last_synced_at")] public DateTime? LastSyncedAt { get; set; }
+        [Column("attendance_group_id")] public Guid? AttendanceGroupId { get; set; }
 
         public Department? Department { get; set; }
+        public AttendanceGroup? AttendanceGroup { get; set; }
     }
 }

@@ -459,6 +459,7 @@ namespace AttendVisionReportsApi.Services
             var records = await query
               .Select(x => new {
                 Person = !string.IsNullOrWhiteSpace(x.PersonName) ? x.PersonName : (x.EmployeeId ?? "Unknown"),
+                EmployeeId = x.EmployeeId,
                 Department = x.Department ?? "Unknown",
                 AccessDatetime = x.AccessDatetime,
                 AccessTime = x.AccessTime,
@@ -467,7 +468,7 @@ namespace AttendVisionReportsApi.Services
               .OrderBy(x => x.Person).ThenBy(x => x.AccessDatetime)
               .ToListAsync();
 
-            var grouped = records.GroupBy(x => new { x.Person, x.Department });
+            var grouped = records.GroupBy(x => new { x.Person, x.EmployeeId, x.Department });
             var result = new List<DayPersonRowResponse>();
             foreach (var group in grouped)
             {
@@ -509,6 +510,7 @@ namespace AttendVisionReportsApi.Services
                 result.Add(new DayPersonRowResponse
                 {
                   person = group.Key.Person,
+                  employee_id = group.Key.EmployeeId,
                   department = group.Key.Department,
                   event_count = eventCount,
                   first_time = firstTime,

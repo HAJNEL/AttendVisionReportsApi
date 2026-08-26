@@ -8,6 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 public class FilterController(IFilterService filterService) : ControllerBase
 {
     [HttpGet("employees")]
-    public async Task<IActionResult> GetDepartmentEmployees([FromQuery] Guid? departmentId) =>
-        Ok(await filterService.GetDepartmentEmployeesAsync(departmentId, User));
+    public async Task<IActionResult> GetDepartmentEmployees([FromQuery] Guid? departmentId, [FromQuery] Guid? attendanceGroupId) =>
+        Ok(await filterService.GetDepartmentEmployeesAsync(departmentId, attendanceGroupId, User));
 }

@@ -1,0 +1,707 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1781437394.3558342,
+    "ast_hash": "af5683cedca023035194f9ad92eb0eef",
+    "semantic_hash": ""
+  },
+  "AttendVisionReportsApi.csproj": {
+    "mtime": 1777149692.364108,
+    "ast_hash": "e857ae7ad5c9aaf35bbfffd630a1519f",
+    "semantic_hash": ""
+  },
+  "AttendVisionReportsApi.sln": {
+    "mtime": 1777149692.3651009,
+    "ast_hash": "a0fd596af942bcb15a59814982e23e45",
+    "semantic_hash": ""
+  },
+  "Controllers/AuthController.cs": {
+    "mtime": 1786131408.951751,
+    "ast_hash": "bdc03f2aa788284cd690ab8275e17c3e",
+    "semantic_hash": ""
+  },
+  "Controllers/CompaniesController.cs": {
+    "mtime": 1777149692.3651009,
+    "ast_hash": "152b9204859fbd7cab3057c20547b617",
+    "semantic_hash": ""
+  },
+  "Controllers/DashboardController.cs": {
+    "mtime": 1781437394.4229598,
+    "ast_hash": "27aa64b6761f2ceb916e3fcefdc1098d",
+    "semantic_hash": ""
+  },
+  "Controllers/DepartmentPaymentRatesController.cs": {
+    "mtime": 1781437394.4229598,
+    "ast_hash": "38fd5b77ff019ff181e5d84fc979eda3",
+    "semantic_hash": ""
+  },
+  "Controllers/DepartmentUsersController.cs": {
+    "mtime": 1777149692.3661005,
+    "ast_hash": "afef879c0bc7985c176cadc0baa50097",
+    "semantic_hash": ""
+  },
+  "Controllers/DepartmentsController.cs": {
+    "mtime": 1786563990.1914992,
+    "ast_hash": "e7f32537b693a768b478d21b429d2463",
+    "semantic_hash": ""
+  },
+  "Controllers/DevicesController.cs": {
+    "mtime": 1787166238.8001113,
+    "ast_hash": "71ff6e4116fdb394b0f8dc89f61e41ee",
+    "semantic_hash": ""
+  },
+  "Controllers/EmployeeLeaveController.cs": {
+    "mtime": 1777149692.3661005,
+    "ast_hash": "8961ee68084c6247f48c44b82bd28756",
+    "semantic_hash": ""
+  },
+  "Controllers/EmployeesController.cs": {
+    "mtime": 1787173855.0610018,
+    "ast_hash": "a32ebcc17cdd7c1977bb9157b77cdaee",
+    "semantic_hash": ""
+  },
+  "Controllers/FilterController.cs": {
+    "mtime": 1781437394.4229598,
+    "ast_hash": "9e6b620f5446c6778075ec9dc7b8671d",
+    "semantic_hash": ""
+  },
+  "Controllers/HealthCheckController.cs": {
+    "mtime": 1777149692.3661005,
+    "ast_hash": "f766353c85e72938ac8a1beda9e9e7ce",
+    "semantic_hash": ""
+  },
+  "Controllers/HikCentralController.cs": {
+    "mtime": 1786571439.4254403,
+    "ast_hash": "2c3f0bd49105cb3aad24fd15795c7c23",
+    "semantic_hash": ""
+  },
+  "Controllers/PermissionsController.cs": {
+    "mtime": 1777149692.3671212,
+    "ast_hash": "f49b65f4062bba21a21a0b40c9fcee91",
+    "semantic_hash": ""
+  },
+  "Controllers/ReportsController.cs": {
+    "mtime": 1783623281.4225953,
+    "ast_hash": "24e4f507f16eead7a713821793cfa112",
+    "semantic_hash": ""
+  },
+  "Controllers/RolesController.cs": {
+    "mtime": 1777149692.3671212,
+    "ast_hash": "49dd76d97f43e04aba76281d89b97936",
+    "semantic_hash": ""
+  },
+  "Controllers/TempEmployeesController.cs": {
+    "mtime": 1786575689.6781652,
+    "ast_hash": "0b2368af7aee124bc4bb751edb5ad64e",
+    "semantic_hash": ""
+  },
+  "Controllers/TimeManagementController.cs": {
+    "mtime": 1781481832.28069,
+    "ast_hash": "fb7ff2644b840c6f8e1066921058dcc4",
+    "semantic_hash": ""
+  },
+  "Controllers/TimeOverridesController.cs": {
+    "mtime": 1777149692.3671212,
+    "ast_hash": "686685091ba393c82f8dfeedf8f7392d",
+    "semantic_hash": ""
+  },
+  "Controllers/UserController.cs": {
+    "mtime": 1786131334.8300521,
+    "ast_hash": "8388438c0f039b4930c34cb7aef0fa35",
+    "semantic_hash": ""
+  },
+  "DTOs/AuthDtos.cs": {
+    "mtime": 1786131344.3837254,
+    "ast_hash": "f84bae01232e3d40519c0bbd60255d9c",
+    "semantic_hash": ""
+  },
+  "DTOs/CompanyDtos.cs": {
+    "mtime": 1777149692.3681319,
+    "ast_hash": "e10c323351b6002bdefb9a22430257a6",
+    "semantic_hash": ""
+  },
+  "DTOs/CreateDepartmentUserDto.cs": {
+    "mtime": 1777149692.3681319,
+    "ast_hash": "5ce4f95eac833fd9791aada704023c06",
+    "semantic_hash": ""
+  },
+  "DTOs/DashboardDtos.cs": {
+    "mtime": 1787166458.7154603,
+    "ast_hash": "982cf982db1b8a44dae971e5d092bdc3",
+    "semantic_hash": ""
+  },
+  "DTOs/DepartmentDtos.cs": {
+    "mtime": 1786563965.888766,
+    "ast_hash": "504e1744855c08cadcde3a930cd82b8a",
+    "semantic_hash": ""
+  },
+  "DTOs/DepartmentPaymentRateDtos.cs": {
+    "mtime": 1781437394.4229598,
+    "ast_hash": "5e466d043ffe88ebd6c6756e4b9f9499",
+    "semantic_hash": ""
+  },
+  "DTOs/DepartmentUserDto.cs": {
+    "mtime": 1777149692.3691242,
+    "ast_hash": "6e8d3df1196d4a52a435b1109ec055e5",
+    "semantic_hash": ""
+  },
+  "DTOs/DeviceDtos.cs": {
+    "mtime": 1787166218.3682697,
+    "ast_hash": "9733938752c66677a95e39b9f3b1ca14",
+    "semantic_hash": ""
+  },
+  "DTOs/EmployeeDtos.cs": {
+    "mtime": 1787310401.7579515,
+    "ast_hash": "4cfb54d39e746450c6169d80a087ec03",
+    "semantic_hash": ""
+  },
+  "DTOs/EmployeeLeaveDtos.cs": {
+    "mtime": 1777149692.3691242,
+    "ast_hash": "4a6624d4bc847b28fbc04bf941b903c2",
+    "semantic_hash": ""
+  },
+  "DTOs/HikCentralDtos.cs": {
+    "mtime": 1787302925.3141468,
+    "ast_hash": "629c5da876182fe085e958741c93c8be",
+    "semantic_hash": ""
+  },
+  "DTOs/PermissionDtos.cs": {
+    "mtime": 1777149692.3691242,
+    "ast_hash": "ae84da07295a74a863246a34e19bcc6a",
+    "semantic_hash": ""
+  },
+  "DTOs/ReportConfigDto.cs": {
+    "mtime": 1783623236.2749636,
+    "ast_hash": "c7352e57d7484c7f649016ad0545584c",
+    "semantic_hash": ""
+  },
+  "DTOs/ReportDtos.cs": {
+    "mtime": 1777149692.3691242,
+    "ast_hash": "9ad3cb9bb1ee4eacc09216b462720893",
+    "semantic_hash": ""
+  },
+  "DTOs/RoleDtos.cs": {
+    "mtime": 1777149692.3691242,
+    "ast_hash": "a23b4cafc13acf51f9a9ed46644479c6",
+    "semantic_hash": ""
+  },
+  "DTOs/SageTimesheetRow.cs": {
+    "mtime": 1781437394.4229598,
+    "ast_hash": "a041a119c22e49851f517f96ddc6f027",
+    "semantic_hash": ""
+  },
+  "DTOs/TempEmployeeDtos.cs": {
+    "mtime": 1786575570.495899,
+    "ast_hash": "5aa1edeb6e2bb52c91f2c1878cfb9bc5",
+    "semantic_hash": ""
+  },
+  "DTOs/TimeManagementDtos.cs": {
+    "mtime": 1781481663.9567952,
+    "ast_hash": "99721f0b7a8b1aed6b476fe904703616",
+    "semantic_hash": ""
+  },
+  "DTOs/TimeOverrideDtos.cs": {
+    "mtime": 1777149692.3691242,
+    "ast_hash": "ac7e50ff2ed804a5531e3cda4ef5df4b",
+    "semantic_hash": ""
+  },
+  "DTOs/UpdateDepartmentUserDto.cs": {
+    "mtime": 1777149692.3701315,
+    "ast_hash": "346fe8b757301f0e28a92276e177d0b1",
+    "semantic_hash": ""
+  },
+  "DTOs/UserDtos.cs": {
+    "mtime": 1786126100.8074064,
+    "ast_hash": "1a825f0213f9f1de1a5d031a61683dc3",
+    "semantic_hash": ""
+  },
+  "Data/AppDbContext.cs": {
+    "mtime": 1786575552.1833227,
+    "ast_hash": "dae17d98785d0ee6450b00d08cd6f3eb",
+    "semantic_hash": ""
+  },
+  "Database/Functions/get_attendance_issues function.sql": {
+    "mtime": 1783621149.2673159,
+    "ast_hash": "5feddc68e693ebc18eea8473af4cd82e",
+    "semantic_hash": ""
+  },
+  "Database/Functions/get_clockings function.sql": {
+    "mtime": 1783621157.9215417,
+    "ast_hash": "69306340f7a7967095c87ab368384cc7",
+    "semantic_hash": ""
+  },
+  "Database/Functions/get_sage_timesheet function.sql": {
+    "mtime": 1783178244.533949,
+    "ast_hash": "b02cb439f36aef052e106da933b222ef",
+    "semantic_hash": ""
+  },
+  "Database/Functions/get_timesheet function.sql": {
+    "mtime": 1783621181.6073203,
+    "ast_hash": "c7391199b14385028552706181d9aac1",
+    "semantic_hash": ""
+  },
+  "Database/add_hikcentral_org_index_code_to_departments.sql": {
+    "mtime": 1785791625.6429334,
+    "ast_hash": "80564c3e03da7afd6146d950f5fa5d8c",
+    "semantic_hash": ""
+  },
+  "Database/add_photo_base64_to_users.sql": {
+    "mtime": 1786126087.5625472,
+    "ast_hash": "207feaa7e61aaa357a405ca58020a058",
+    "semantic_hash": ""
+  },
+  "Database/create_device_licenses_table.sql": {
+    "mtime": 1786135019.749102,
+    "ast_hash": "9cfecb2ab4ae854c981bc60b74ba0db6",
+    "semantic_hash": ""
+  },
+  "Database/create_employees_table.sql": {
+    "mtime": 1786119232.5744867,
+    "ast_hash": "223fcb8cfba262655bd74d5fe6de3efb",
+    "semantic_hash": ""
+  },
+  "Database/create_impersonation_events_table.sql": {
+    "mtime": 1786131295.6058729,
+    "ast_hash": "b787fde336c357081327924fe397455b",
+    "semantic_hash": ""
+  },
+  "Database/create_temp_employees_table.sql": {
+    "mtime": 1786575480.285481,
+    "ast_hash": "a3aef265c6b9e6da5cd1d01d1d8e7292",
+    "semantic_hash": ""
+  },
+  "Helpers/ClaimsHelper.cs": {
+    "mtime": 1777149692.3701315,
+    "ast_hash": "a75b71ee82d3ab91fa4b0fcc09cea129",
+    "semantic_hash": ""
+  },
+  "Helpers/PgFunctionHelper.cs": {
+    "mtime": 1777149692.3701315,
+    "ast_hash": "65f82be2db8904b890ce7320a3cff25a",
+    "semantic_hash": ""
+  },
+  "Helpers/PgProcedureHelper.cs": {
+    "mtime": 1777149692.3712454,
+    "ast_hash": "601f2aa4d598362b75835b9134ee6b2e",
+    "semantic_hash": ""
+  },
+  "Models/AccessRecord.cs": {
+    "mtime": 1777149692.3712454,
+    "ast_hash": "82aeecbf0181e9ce659111a32cf36b96",
+    "semantic_hash": ""
+  },
+  "Models/Company.cs": {
+    "mtime": 1777149692.3712454,
+    "ast_hash": "9464936cdc43ad1033e41ef251b77e2e",
+    "semantic_hash": ""
+  },
+  "Models/Department.cs": {
+    "mtime": 1785791624.8167577,
+    "ast_hash": "19584a1331e47c5bb52630815d4d75a4",
+    "semantic_hash": ""
+  },
+  "Models/DepartmentPaymentRate.cs": {
+    "mtime": 1782320435.7688282,
+    "ast_hash": "ba3b6469b81975d9942b3eed35f7e1cd",
+    "semantic_hash": ""
+  },
+  "Models/DepartmentUser.cs": {
+    "mtime": 1777149692.3712454,
+    "ast_hash": "cccabb5de53b6209fc85b12a671848f6",
+    "semantic_hash": ""
+  },
+  "Models/DeviceLicense.cs": {
+    "mtime": 1786135015.530771,
+    "ast_hash": "405151003af565651f7125e7dff07dda",
+    "semantic_hash": ""
+  },
+  "Models/Employee.cs": {
+    "mtime": 1786119213.5034194,
+    "ast_hash": "9a52c8bd3aef7d48c7f54c895e4e6337",
+    "semantic_hash": ""
+  },
+  "Models/EmployeeAccessLevel.cs": {
+    "mtime": 1786119215.180103,
+    "ast_hash": "4e11aae4dcae5486c38f5474839c6e18",
+    "semantic_hash": ""
+  },
+  "Models/EmployeeLeave.cs": {
+    "mtime": 1777149692.372245,
+    "ast_hash": "3fb3fc6d5848c902f538754acdda2826",
+    "semantic_hash": ""
+  },
+  "Models/ImpersonationEvent.cs": {
+    "mtime": 1786131291.2685142,
+    "ast_hash": "f4580b3a3bc86a58cf23a6c0dc7c24d9",
+    "semantic_hash": ""
+  },
+  "Models/Permission.cs": {
+    "mtime": 1777149692.372245,
+    "ast_hash": "f74a1a9149b33af3b2893515dc230416",
+    "semantic_hash": ""
+  },
+  "Models/ReportConfig.cs": {
+    "mtime": 1783623235.1778963,
+    "ast_hash": "0e929d5c2a461dcfe5db7611cf623409",
+    "semantic_hash": ""
+  },
+  "Models/Role.cs": {
+    "mtime": 1777149692.372245,
+    "ast_hash": "52280fb6943af4f325c3bbae78a322c5",
+    "semantic_hash": ""
+  },
+  "Models/RolePermission.cs": {
+    "mtime": 1777149692.372245,
+    "ast_hash": "2feb3db13fcb145d605d0bdeb4c7915b",
+    "semantic_hash": ""
+  },
+  "Models/TempEmployee.cs": {
+    "mtime": 1786575540.8347986,
+    "ast_hash": "7a1a1b14a3a6b4c74a5516bb98a7b563",
+    "semantic_hash": ""
+  },
+  "Models/TimeManagementConfig.cs": {
+    "mtime": 1781481635.0206773,
+    "ast_hash": "a73498e4f48fc81641c85d7b6e75fff5",
+    "semantic_hash": ""
+  },
+  "Models/TimeOverride.cs": {
+    "mtime": 1777149692.372245,
+    "ast_hash": "a65c2212543184b55c7b3ab85967cc2b",
+    "semantic_hash": ""
+  },
+  "Models/User.cs": {
+    "mtime": 1786126091.973521,
+    "ast_hash": "151e1c84c8d45ee26319f478fb4c2d83",
+    "semantic_hash": ""
+  },
+  "Models/UserRole.cs": {
+    "mtime": 1777149692.3732524,
+    "ast_hash": "4f5a9ae21b334660c184b74cb8ab0349",
+    "semantic_hash": ""
+  },
+  "Program.cs": {
+    "mtime": 1786575713.027107,
+    "ast_hash": "8f8c154fb29ec7e26dbbd7a3fba97f6a",
+    "semantic_hash": ""
+  },
+  "Properties/launchSettings.json": {
+    "mtime": 1777149692.3742461,
+    "ast_hash": "f49b66860a5242b996604a61eb82f006",
+    "semantic_hash": ""
+  },
+  "Services/AuthService.cs": {
+    "mtime": 1786131374.5019276,
+    "ast_hash": "8d208324082d3c8b4a1521e545b93368",
+    "semantic_hash": ""
+  },
+  "Services/CompanyService.cs": {
+    "mtime": 1777149692.3742461,
+    "ast_hash": "288155083203129f5cbd0267c2a5712e",
+    "semantic_hash": ""
+  },
+  "Services/DashboardService.cs": {
+    "mtime": 1787166467.5494435,
+    "ast_hash": "c9d8ecc30a512f1e0f28ee2d4e497006",
+    "semantic_hash": ""
+  },
+  "Services/DepartmentPaymentRateService.cs": {
+    "mtime": 1781437394.4229598,
+    "ast_hash": "e8ab534fe610ec61a3d3c6f9144408a8",
+    "semantic_hash": ""
+  },
+  "Services/DepartmentSyncService.cs": {
+    "mtime": 1787173116.5248728,
+    "ast_hash": "1b8602f907db272b8b80b917f895dfc1",
+    "semantic_hash": ""
+  },
+  "Services/DepartmentUserService.cs": {
+    "mtime": 1777149692.3754294,
+    "ast_hash": "a7d4594fbc9b5a185d6a85bb76620977",
+    "semantic_hash": ""
+  },
+  "Services/DepartmentsService.cs": {
+    "mtime": 1785791655.436238,
+    "ast_hash": "c792e337871eb1ed7456e04e260a6191",
+    "semantic_hash": ""
+  },
+  "Services/DevicesService.cs": {
+    "mtime": 1787168656.066409,
+    "ast_hash": "74c041a86a5ce96ada81ba6e9c793f8a",
+    "semantic_hash": ""
+  },
+  "Services/EmployeeLeaveService.cs": {
+    "mtime": 1777149692.3754294,
+    "ast_hash": "37287ac6d4716ae7ac45d35bf7cd9eaa",
+    "semantic_hash": ""
+  },
+  "Services/EmployeeSyncService.cs": {
+    "mtime": 1787312731.1331675,
+    "ast_hash": "4d56f29f892e19e22606a0cb5dca200e",
+    "semantic_hash": ""
+  },
+  "Services/FilterService.cs": {
+    "mtime": 1787168851.2806606,
+    "ast_hash": "58db528c29fd4dfe44cdfcf3402760a9",
+    "semantic_hash": ""
+  },
+  "Services/HealthCheckService.cs": {
+    "mtime": 1777149692.3754294,
+    "ast_hash": "2222b63294a1ee938c9e2d5ad74df5da",
+    "semantic_hash": ""
+  },
+  "Services/HikCentralService.cs": {
+    "mtime": 1787312689.1058433,
+    "ast_hash": "ed01f6b7ab6d3c0451d9706090765a72",
+    "semantic_hash": ""
+  },
+  "Services/HikCentral/ArtemisSigningHandler.cs": {
+    "mtime": 1785788501.6441789,
+    "ast_hash": "b61bd9eee547a272b6cf603f97015654",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IAuthService.cs": {
+    "mtime": 1786131349.3328798,
+    "ast_hash": "111fda8fe5cb7dd6351d94506abe8b00",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/ICompanyService.cs": {
+    "mtime": 1777149692.376434,
+    "ast_hash": "b70e10d7f6f29b13ef7e990483f75017",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IDashboardService.cs": {
+    "mtime": 1781437394.4229598,
+    "ast_hash": "f06e218d403b9dc412e4557a13baa009",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IDepartmentSyncService.cs": {
+    "mtime": 1786563968.8325756,
+    "ast_hash": "2f25e810769d14d99fb443b9bebb87f7",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IDepartmentUserService.cs": {
+    "mtime": 1777149692.3769176,
+    "ast_hash": "b3b6bbba44507320642bf5b60feef1a2",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IDepartmentsService.cs": {
+    "mtime": 1777149692.3769176,
+    "ast_hash": "1893cfed0a6ca09a6d5f46cf7b47bf98",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IDevicesService.cs": {
+    "mtime": 1787166221.5873983,
+    "ast_hash": "1f4f973097185a3f0e428cc0e2ea9544",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IEmployeeLeaveService.cs": {
+    "mtime": 1777149692.3769176,
+    "ast_hash": "4d3647c5b059926a678ceb472608b777",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IEmployeeSyncService.cs": {
+    "mtime": 1787173839.8645391,
+    "ast_hash": "d1c0e7c93e1e7a29b12b924cffe9e2b6",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IFilterService.cs": {
+    "mtime": 1781437394.4229598,
+    "ast_hash": "7ff9b44d59a29256ad9692164b876ef7",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IHealthCheckService.cs": {
+    "mtime": 1777149692.3769176,
+    "ast_hash": "7674e78bb6e5c94a817d5c10332b8110",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IHikCentralService.cs": {
+    "mtime": 1787312682.77786,
+    "ast_hash": "da0a251fe68984444abfdb9ee900bfbb",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IPermissionService.cs": {
+    "mtime": 1777149692.3779209,
+    "ast_hash": "be0163d5cd550272860e6b4117be08aa",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IReportsService.cs": {
+    "mtime": 1783623253.5456474,
+    "ast_hash": "98aa508089841c1d088032cec6e42fe6",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IRoleService.cs": {
+    "mtime": 1777149692.3779209,
+    "ast_hash": "0bb0e7c17bc514be6144e10b7ddd54c2",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/ITempEmployeeService.cs": {
+    "mtime": 1786575630.300359,
+    "ast_hash": "5c35d0f59a7b5526f77980c650c1982d",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/ITimeManagementService.cs": {
+    "mtime": 1781481676.277352,
+    "ast_hash": "f9e7e66e8cba20a851ff0c3bcb1e18ab",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/ITimeOverrideService.cs": {
+    "mtime": 1777149692.3779209,
+    "ast_hash": "77a7cb9e5987ccc8d7ad52216a471c64",
+    "semantic_hash": ""
+  },
+  "Services/Interfaces/IUserService.cs": {
+    "mtime": 1786131315.1068194,
+    "ast_hash": "180efc96ffd70d5d299e1332f6d75dfb",
+    "semantic_hash": ""
+  },
+  "Services/PermissionService.cs": {
+    "mtime": 1777149692.3779209,
+    "ast_hash": "296d35413d31a76c7821788c7bf43a10",
+    "semantic_hash": ""
+  },
+  "Services/ReportsService.cs": {
+    "mtime": 1783623269.9594133,
+    "ast_hash": "624246bd606f1dd6d80767fa0d08c85a",
+    "semantic_hash": ""
+  },
+  "Services/RoleService.cs": {
+    "mtime": 1777149692.3789198,
+    "ast_hash": "9cddb04c68a42e999be9a174652c7a68",
+    "semantic_hash": ""
+  },
+  "Services/TempEmployeeService.cs": {
+    "mtime": 1786575652.0898502,
+    "ast_hash": "eda1346317345401f5efa1e844a88782",
+    "semantic_hash": ""
+  },
+  "Services/TimeManagementService.cs": {
+    "mtime": 1781481815.3374896,
+    "ast_hash": "84daf17c59420c78d571996eae4c06ae",
+    "semantic_hash": ""
+  },
+  "Services/TimeOverrideService.cs": {
+    "mtime": 1777149692.3789198,
+    "ast_hash": "e7fc8c766bdce308725763b014dcb351",
+    "semantic_hash": ""
+  },
+  "Services/UserService.cs": {
+    "mtime": 1786131330.3518412,
+    "ast_hash": "2a9bc6b2bd8f17795cdc4b596919b2b3",
+    "semantic_hash": ""
+  },
+  "appsettings.Development.json": {
+    "mtime": 1787305291.737118,
+    "ast_hash": "874f84c86e8987044789c3d0f633408d",
+    "semantic_hash": ""
+  },
+  "appsettings.json": {
+    "mtime": 1787305230.0779502,
+    "ast_hash": "fbd76914c851dcdbf75daa106fa54228",
+    "semantic_hash": ""
+  },
+  "dotnet-tools.json": {
+    "mtime": 1777149692.604731,
+    "ast_hash": "bcc51108a7b5663f7757e4ee044376c4",
+    "semantic_hash": ""
+  },
+  "publish/AttendVisionReportsApi.deps.json": {
+    "mtime": 1777149692.684279,
+    "ast_hash": "4804a56c164f8eccf285d62b10fe464f",
+    "semantic_hash": ""
+  },
+  "publish/AttendVisionReportsApi.runtimeconfig.json": {
+    "mtime": 1777149692.687282,
+    "ast_hash": "fabc807840a82d5b358891216972a7da",
+    "semantic_hash": ""
+  },
+  "publish/AttendVisionReportsApi.staticwebassets.endpoints.json": {
+    "mtime": 1777149692.687282,
+    "ast_hash": "c257f74d704f9d4fdd2c1313d6fd7a72",
+    "semantic_hash": ""
+  },
+  "publish/appsettings.Development.json": {
+    "mtime": 1777149692.734132,
+    "ast_hash": "804b473502a4c415cf75db61c56c32aa",
+    "semantic_hash": ""
+  },
+  "publish/appsettings.json": {
+    "mtime": 1777149692.734132,
+    "ast_hash": "acde0688884279eaf6dec7fd0d7578a1",
+    "semantic_hash": ""
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1781437394.3558342,
+    "ast_hash": "817fe671013b35ae0bc9301dfe449a87",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/SKILL.md": {
+    "mtime": 1781437394.3715165,
+    "ast_hash": "2b322366533837bd4968c9eb1700574a",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/add-watch.md": {
+    "mtime": 1781437394.3724003,
+    "ast_hash": "e10311cd2f69de7d62674eff2b87420f",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/exports.md": {
+    "mtime": 1781437394.3724003,
+    "ast_hash": "4b1c094b3077da6b95ec99694612327e",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/extraction-spec.md": {
+    "mtime": 1781437394.3724003,
+    "ast_hash": "a50d4409dbac381356a25ca0905d833c",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/github-and-merge.md": {
+    "mtime": 1781437394.389357,
+    "ast_hash": "aa0e7ef186392cad062e60483ca7dbbf",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/hooks.md": {
+    "mtime": 1781437394.389357,
+    "ast_hash": "0045c2f12c69bff3a641a8908a1ac057",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/query.md": {
+    "mtime": 1781437394.389357,
+    "ast_hash": "82efbb856d6a3e15e7d78743b34a63c1",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/transcribe.md": {
+    "mtime": 1781437394.389357,
+    "ast_hash": "cf217decf113af55483edfa042f22db5",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/update.md": {
+    "mtime": 1781437394.389357,
+    "ast_hash": "c7a284f2788907c62b1627839ab9a9f9",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1781437394.4229598,
+    "ast_hash": "8a6643a420fdad6bfb583523bc6cef16",
+    "semantic_hash": ""
+  },
+  "HIK_API/openapi-api.yaml": {
+    "mtime": 1785789082.9266186,
+    "ast_hash": "e3879982c29d7080ef4a7f5db78c31a6",
+    "semantic_hash": ""
+  },
+  "build_output.txt": {
+    "mtime": 1781437394.4557734,
+    "ast_hash": "73413b473e2ec39f3049621ec5f17411",
+    "semantic_hash": ""
+  },
+  "HIK_API/HikCentral-OpenAPI-Endpoints.md": {
+    "mtime": 1787312892.729975,
+    "ast_hash": "34fd14091a28217734140f44a30d109f",
+    "semantic_hash": ""
+  },
+  "HIK_API/HikCentral.postman_collection.json": {
+    "mtime": 1787590746.8178637,
+    "ast_hash": "952a1fe77958c4a0b864dc2ed8018b5f",
+    "semantic_hash": ""
+  }
+}

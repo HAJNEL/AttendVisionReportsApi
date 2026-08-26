@@ -22,7 +22,17 @@
         public DbSet<ReportConfig> ReportConfigs => Set<ReportConfig>();
         public DbSet<Employee> Employees => Set<Employee>();
         public DbSet<EmployeeAccessLevel> EmployeeAccessLevels => Set<EmployeeAccessLevel>();
+        public DbSet<TempEmployee> TempEmployees => Set<TempEmployee>();
+        public DbSet<TempEmployeeHistory> TempEmployeeHistories => Set<TempEmployeeHistory>();
         public DbSet<ImpersonationEvent> ImpersonationEvents => Set<ImpersonationEvent>();
+        public DbSet<DeviceLicense> DeviceLicenses => Set<DeviceLicense>();
+        public DbSet<AttendanceGroup> AttendanceGroups => Set<AttendanceGroup>();
+        public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
+        public DbSet<Invoice> Invoices => Set<Invoice>();
+        public DbSet<InvoiceLineItem> InvoiceLineItems => Set<InvoiceLineItem>();
+        public DbSet<InvoiceSettings> InvoiceSettingsEntries => Set<InvoiceSettings>();
+        public DbSet<InvoiceTemplate> InvoiceTemplates => Set<InvoiceTemplate>();
+        public DbSet<InvoiceTemplateItem> InvoiceTemplateItems => Set<InvoiceTemplateItem>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // EmployeeLeave configuration
@@ -204,6 +214,24 @@
             modelBuilder.Entity<ImpersonationEvent>()
                 .ToTable("impersonation_events")
                 .HasKey(e => e.Id);
+
+            // Invoice configuration
+            modelBuilder.Entity<Invoice>()
+                .HasMany(i => i.LineItems)
+                .WithOne()
+                .HasForeignKey(l => l.InvoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(i => i.InvoiceNumber)
+                .IsUnique();
+
+            // InvoiceTemplate configuration
+            modelBuilder.Entity<InvoiceTemplate>()
+                .HasMany(t => t.Items)
+                .WithOne()
+                .HasForeignKey(i => i.TemplateId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

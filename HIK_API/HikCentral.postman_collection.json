@@ -1,0 +1,3144 @@
+{
+  "info": {
+    "name": "HikCentral Professional OpenAPI — AttendVision",
+    "description": "Full coverage of the guide: Common, Resource Management, Access Control, Attendance, Video, Alarm and Event, Intelligent Analysis, Visitor Management, Vehicle and Parking, On-Board Monitoring, Commercial Display, Video Tracing, Canteen Consumption, and Education. The modules AttendVisionReportsApi actually uses (Resource Management, Access Control, Attendance) were hand-verified against this project's own code; everything else was extracted directly from the guide's own request examples and not cross-checked against a live server. Built from the HikCentral Professional OpenAPI V3.1.1 Developer Guide (2026-07-23).\n\nAK/SK request signing (HMAC-SHA256, matching ArtemisSigningHandler.cs) is done automatically by the collection-level Pre-request Script — every request in this collection gets signed when you hit Send, no manual header work needed.\n\nBefore first use:\n1. Set the `appKey`, `appSecret`, `baseUrl`, and `userId` collection variables below (pre-filled from this project's appsettings.Development.json — update if they've since changed).\n2. If `baseUrl` uses a self-signed cert (this deployment does), turn off Postman's SSL certificate verification: Settings → General → \"SSL certificate verification\" → off. Otherwise every request will fail at the TLS handshake before signing even matters.\n3. Requests marked ⚠️ WRITE actually create/update/delete data on the live HikCentral server. Nothing in this collection has been executed automatically — that's on you to trigger deliberately.\n\nThe Attendance → \"Get Daily Attendance Report\" request's body includes an `orgIndexCode: []` field that the older guide's example omitted and this project's code has never sent — worth trying that exact body first, since every previous attempt (13 request-shape variations, all without this field) failed identically with a 'beginTime parameter error'. See the `hikcentral_attendance_report_endpoint` memory / HikCentral-OpenAPI-Endpoints.md for the full debugging history.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://13.247.35.150:444",
+      "type": "string"
+    },
+    {
+      "key": "appKey",
+      "value": "50264357",
+      "type": "string"
+    },
+    {
+      "key": "appSecret",
+      "value": "30uLVSe51jPkeu9O4u2d",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "admin",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// HikCentral Artemis AK/SK request signing (Alibaba Cloud API Gateway style).",
+          "// Mirrors AttendVisionReportsApi/Services/HikCentral/ArtemisSigningHandler.cs",
+          "// exactly, including its quirks (contentType is always 'application/json' in",
+          "// the string-to-sign even when no body is sent; no Date line is ever included).",
+          "// Runs before every request in this collection - no per-request setup needed.",
+          "",
+          "const appKey = pm.collectionVariables.get('appKey');",
+          "const appSecret = pm.collectionVariables.get('appSecret');",
+          "const userId = pm.collectionVariables.get('userId');",
+          "",
+          "const accept = 'application/json';",
+          "const contentType = 'application/json';",
+          "const timestamp = Date.now().toString();",
+          "",
+          "let bodyStr = '';",
+          "if (pm.request.body && pm.request.body.mode === 'raw' && pm.request.body.raw) {",
+          "    bodyStr = pm.request.body.raw;",
+          "}",
+          "",
+          "let contentMd5 = '';",
+          "if (bodyStr.length > 0) {",
+          "    contentMd5 = CryptoJS.MD5(bodyStr).toString(CryptoJS.enc.Base64);",
+          "    pm.request.headers.upsert({ key: 'Content-Type', value: contentType });",
+          "    pm.request.headers.upsert({ key: 'Content-MD5', value: contentMd5 });",
+          "}",
+          "",
+          "pm.request.headers.upsert({ key: 'Accept', value: accept });",
+          "pm.request.headers.upsert({ key: 'X-Ca-Key', value: appKey });",
+          "pm.request.headers.upsert({ key: 'X-Ca-Timestamp', value: timestamp });",
+          "pm.request.headers.upsert({ key: 'X-Ca-Signature-Headers', value: 'x-ca-key,x-ca-timestamp' });",
+          "if (userId) {",
+          "    pm.request.headers.upsert({ key: 'userId', value: userId });",
+          "}",
+          "",
+          "// Canonicalized resource: path + query params sorted alphabetically by key",
+          "// (matches ArtemisSigningHandler.BuildCanonicalizedResource). None of the",
+          "// endpoints in this collection use query params - all filtering is in the",
+          "// POST body - but this stays general in case you add one that does.",
+          "const url = pm.request.url;",
+          "const path = '/' + url.path.join('/');",
+          "let resource = path;",
+          "if (url.query && url.query.count() > 0) {",
+          "    const pairs = url.query.all()",
+          "        .map(q => ({ key: q.key, value: q.value || '' }))",
+          "        .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0))",
+          "        .map(p => (p.value.length > 0 ? `${p.key}=${p.value}` : p.key));",
+          "    resource = `${path}?${pairs.join('&')}`;",
+          "}",
+          "",
+          "const canonicalizedHeaders = `x-ca-key:${appKey}\\nx-ca-timestamp:${timestamp}\\n`;",
+          "const stringToSign = `${pm.request.method}\\n${accept}\\n${contentMd5}\\n${contentType}\\n${canonicalizedHeaders}${resource}`;",
+          "",
+          "const signature = CryptoJS.HmacSHA256(stringToSign, appSecret).toString(CryptoJS.enc.Base64);",
+          "pm.request.headers.upsert({ key: 'X-Ca-Signature', value: signature });"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Common",
+      "item": [
+        {
+          "name": "Get Version",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/common/v1/version",
+            "description": "No request body - userId header only (added automatically by the pre-request script)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resource - Devices",
+      "item": [
+        {
+          "name": "Get Access Control Device List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 50\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/acsDevice/acsDeviceList"
+          }
+        },
+        {
+          "name": "Get Access Control Device Info",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"acsDevIndexCode\": \"46\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/acsDevice/indexCode/acsDeviceInfo",
+            "description": "Replace acsDevIndexCode with a real ID from Get Access Control Device List's response."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resource - Organizations",
+      "item": [
+        {
+          "name": "Get Organization List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 100\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/org/orgList"
+          }
+        },
+        {
+          "name": "Get Organization Info",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orgIndexCode\": \"1\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/org/orgIndexCode/orgInfo",
+            "description": "Replace orgIndexCode with a real ID from Get Organization List's response."
+          }
+        },
+        {
+          "name": "Search Organizations",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orgName\": \"\",\n  \"pageNo\": 1,\n  \"pageSize\": 100\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/org/advance/orgList",
+            "description": "Fuzzy search by orgName/orgIndexCode. Leave orgName empty to get everything, same as orgList, but via the traversing search that always includes parent nodes."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resource - Access Points",
+      "item": [
+        {
+          "name": "Get Access Point List by Area",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regionIndexCode\": \"1\",\n  \"pageNo\": 1,\n  \"pageSize\": 50\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/acsDoor/region/acsDoorList",
+            "description": "regionIndexCode is an area ID (see Logical Resources > Area Information in the guide if you need to look one up) - not in this collection since this project's code doesn't use Area endpoints."
+          }
+        },
+        {
+          "name": "Get Access Point Info",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doorIndexCode\": \"938\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/acsDoor/indexCode/acsDoorInfo",
+            "description": "Replace doorIndexCode with a real ID - e.g. from Access Control > Search Access Events results, or Get Access Point List by Area."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resource - Persons",
+      "item": [
+        {
+          "name": "Get Person List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 50,\n  \"showAccessLevel\": 1\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/person/personList",
+            "description": "showAccessLevel:1 is new in this guide vs. what this project's SearchPersonsAsync sends - if it actually returns access-level info embedded per person, that could replace the group-membership-enumeration workaround in GetAccessLevelPersonsAsync entirely. Worth checking the response for an access-level field."
+          }
+        },
+        {
+          "name": "Get Person Info by ID",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personId\": \"187\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/person/personId/personInfo",
+            "description": "187 is Abongile Bula's HikCentral personId, already confirmed working via this project's own hikcentral-test endpoint - good smoke test."
+          }
+        },
+        {
+          "name": "Get Person Info by Code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personCode\": \"EIK1\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/person/personCode/personInfo",
+            "description": "EIK1 is Abongile Bula's employeeNo/personCode."
+          }
+        },
+        {
+          "name": "Search Persons",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 50\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/person/advance/personList",
+            "description": "Add personName/personCode/orgIndexCode filters as needed - see the guide's Person Information section for the full filter list."
+          }
+        },
+        {
+          "name": "Get Person Picture",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personId\": \"187\",\n  \"picUri\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/person/picture_data",
+            "description": "Fill picUri from a personInfo response's personPhoto.picUri field. This project's photo-sync path already gets 'HikCentral API error 12: The URL is not supported' on this deployment (see [[employees_master_data_sync]] memory) - this request lets you confirm that directly."
+          }
+        },
+        {
+          "name": "⚠️ WRITE - Add Person",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personCode\": \"TESTPOSTMAN1\",\n  \"personFamilyName\": \"Test\",\n  \"personGivenName\": \"Postman\",\n  \"gender\": 0,\n  \"orgIndexCode\": \"1\",\n  \"beginTime\": \"2026-01-01T00:00:00+02:00\",\n  \"endTime\": \"2036-01-01T00:00:00+02:00\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/person/single/add",
+            "description": "Creates a real person on the live HikCentral server. personCode rejects hyphens (confirmed in this project's own testing) - alphanumeric only. Clean up any test person you create."
+          }
+        },
+        {
+          "name": "⚠️ WRITE - Update Person",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personId\": \"REPLACE_ME\",\n  \"remark\": \"updated via Postman\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/person/single/update",
+            "description": "HikCentral's update appears to replace omitted fields rather than patch them (confirmed in this project's own testing - remark got cleared by an unrelated field update once). Include every field you want to keep, not just the one you're changing."
+          }
+        },
+        {
+          "name": "⚠️ WRITE - Delete Person",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personId\": \"REPLACE_ME\",\n  \"adminPassword\": \"REPLACE_ME\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/person/single/delete",
+            "description": "IMPORTANT: this newer guide shows an 'adminPassword' field in the request body that this project's code has never sent (DeletePersonAsync only sends personIds). This project's memory records delete-person as 'error 8: product version not supported' on this deployment - but that may actually have been a missing-adminPassword validation failure being misreported, not a real version/licensing gap. Worth testing here before touching app code, same pattern as the Attendance endpoint below."
+          }
+        },
+        {
+          "name": "⚠️ WRITE - Update Person Face",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personId\": \"REPLACE_ME\",\n  \"faceData\": \"REPLACE_ME_BASE64_JPEG\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/resource/v1/person/face/update",
+            "description": "Already confirmed 'HikCentral API error 12: The URL is not supported' on this deployment via this project's own code - same licensing-gap family as Get Person Picture above."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Access Control",
+      "item": [
+        {
+          "name": "⚠️ WRITE - Control Door",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doorIndexCodes\": [\"938\"],\n  \"controlType\": 3,\n  \"controlDirection\": 0\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/acs/v1/door/doControl",
+            "description": "controlType: 0-remain open, 1-close, 2-open, 3-remain closed. Defaults to 3 (remain closed) here as the least disruptive option - double-check before changing to 0/2 on a real door."
+          }
+        },
+        {
+          "name": "Search Access Events",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startTime\": \"2026-08-21T00:00:00+02:00\",\n  \"endTime\": \"2026-08-21T23:59:59+02:00\",\n  \"doorIndexCodes\": [],\n  \"pageNo\": 1,\n  \"pageSize\": 50\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/acs/v1/door/events",
+            "description": "This guide marks doorIndexCodes as Req., but this project's SearchAccessEventsAsync sends it as optional/nullable and it works live - kept as an empty array here to match what's already confirmed working rather than the doc."
+          }
+        },
+        {
+          "name": "Get Access Level List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 100,\n  \"type\": 1\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/acs/v1/privilege/group",
+            "description": "type: 1-access control, 2-visitor."
+          }
+        },
+        {
+          "name": "Get Persons in Access Level",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 200,\n  \"type\": 1,\n  \"privilegeGroupId\": \"REPLACE_ME\"\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/acs/v1/privilege/group/single/personList",
+            "description": "privilegeGroupId from Get Access Level List's response. This is the documented, working way to find a person's access levels (no reverse per-person lookup exists) - already confirmed live on this deployment via this project's Employees Test button."
+          }
+        },
+        {
+          "name": "⚠️ WRITE - Assign Access Level to Person",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"privilegeGroupId\": \"REPLACE_ME\",\n  \"type\": 1,\n  \"list\": [\n    { \"id\": \"REPLACE_ME_PERSON_ID\" }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/acs/v1/privilege/group/single/addPersons"
+          }
+        },
+        {
+          "name": "⚠️ WRITE - Unassign Access Level from Person",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"privilegeGroupId\": \"REPLACE_ME\",\n  \"type\": 1,\n  \"list\": [\n    { \"id\": \"REPLACE_ME_PERSON_ID\" }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/acs/v1/privilege/group/single/deletePersons"
+          }
+        },
+        {
+          "name": "Get Visitor Access Level Application Info",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/person/ID/elementDownloadDetail",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"125\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Access Schedule Template List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/acs/v1/schedule/accessSchedule/get",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "Get Daily Attendance Report",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"attendanceReportRequest\": {\n    \"pageNo\": 1,\n    \"pageSize\": 100,\n    \"queryInfo\": {\n      \"personID\": [\"187\"],\n      \"orgIndexCode\": [],\n      \"beginTime\": \"2026-08-21T00:00:00+02:00\",\n      \"endTime\": \"2026-08-21T23:59:59+02:00\",\n      \"sortInfo\": {\n        \"sortField\": 1,\n        \"sortType\": 1\n      }\n    }\n  }\n}"
+            },
+            "url": "{{baseUrl}}/artemis/api/attendance/v1/report",
+            "description": "THIS IS THE KEY ONE. 13 request-shape variations from this project's app code (4 date formats, 5 body-content variants, 4 header/structure variants) all failed identically with 'HikCentral API error 2: Incorrect request parameter. [beginTime parameter error]' - see the hikcentral_attendance_report_endpoint memory for the full log. None of those 13 attempts included \"orgIndexCode\": [] inside queryInfo - this V3.1.1 guide's example does, and the older V3.0.1 guide this project originally used didn't show it. Try this exact body first. If it still fails identically, that's strong confirmation the module genuinely isn't licensed on this deployment (the endpoint is 'Supported since V2.6.0' per this guide, so an older/unlicensed edition would explain a hardcoded failure regardless of request shape). If it succeeds, the fix is a one-line change to HikCentralAttendanceReportQueryInfo in HikCentralDtos.cs to add the orgIndexCode field."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alarm and Event",
+      "item": [
+        {
+          "name": "Acknowledge the Alarm",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/eventRecords/controlling",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventIndexCodes\": \"1f276203e5234bdca08f7d99e1097bba\",\n  \"controlType\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Search for Alarm or Event Details",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/eventRecords/page",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventIndexCode\": \"1\",\n  \"eventTypes\": \"131329,131330,131331\",\n  \"srcType\": \"camera\",\n  \"srcIndexs\": \"1,2\",\n  \"startTime\": \"2019-08-26T15:00:00+08:00\",\n  \"endTime\": \"2019-09-26T16:00:00+08:00\",\n  \"pageNo\": 1,\n  \"pageSize\": 100,\n  \"subSrcType\": \"LPRVehicleList\",\n  \"subSrcIndexs\": \"1,2,3,4\",\n  \"sortField\": \"TriggeringTime\",\n  \"orderType\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Subscribe to Events by Event Type",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/eventSubscriptionByEventTypes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventTypes\": [\n    131329,\n    131330,\n    131331\n  ],\n  \"eventDest\": \"https://10.18.66.21:8080/eventRcv\",\n  \"token\": \"anything\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Search for Event Subscription Details by User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/eventSubscriptionView"
+          }
+        },
+        {
+          "name": "Cancel Subscribing Events by Event Type",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/eventUnSubscriptionByEventTypes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventTypes\": [\n    131329,\n    131330,\n    131331\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Get the Information List of Generic Events",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/generalEventRule/generalEventRuleList",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Add a Generic Event",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/generalEventRule/single/add",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"generalEventRuleName\": \"name1\",\n  \"transportType\": 0,\n  \"matchType\": 0,\n  \"expression\": \"'1' AND '2'\",\n  \"regularExpression\": \"(1.*2|2.*1)\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a Generic Event",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/generalEventRule/single/delete",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"generalEventRuleIndexCode\": \"1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Edit a Generic Event",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/generalEventRule/single/update",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"generalEventRuleIndexCode\": \"1\",\n  \"generalEventRuleName\": \"name2\",\n  \"transportType\": 0,\n  \"matchType\": 0,\n  \"expression\": \"\\\"1\\\" AND \\\"2\\\"\",\n  \"regularExpression\": \"(1.*2|2.*1)\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Enable Receiving Generic Events",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/generalEventRule/triggerAlarm",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"generalEventRuleIndexCodes\": \"1\",\n  \"description\": \"descriptioninfo\",\n  \"alarmPriority\": 1,\n  \"triggerPopupWindows\": 0,\n  \"linkCameraList\": [\n    {\n      \"cameraIndexCode\": \"1\",\n      \"recordType\": 0\n    }\n  ],\n  \"defaultPlayType\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Alarm Picture by URL",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/image_data",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"picUri\": \"/pic?=d7ei703i10cd*73a-d5108a--22cd0c9d6592aiid=\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Search AIOP and HEOP Event Lists",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/eventService/v1/deviceApplicationEvent",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"criteria\": {\n    \"eventCategory\": 100652,\n    \"eventName\": \"name\"\n  },\n  \"sort\": {\n    \"sortField\": \"EventName\",\n    \"orderType\": 0\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Canteen Consumption",
+      "item": [
+        {
+          "name": "Get Department Consume Groups",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/ConsumeControl/GetDepartmentConsumeGroups"
+          }
+        },
+        {
+          "name": "Add Custom Payment Group",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/ConsumeControl/ConsumeGroup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"GroupCreateRequest\": {\n    \"GroupName\": \"Test\",\n    \"PersonListRequest\": {\n      \"KeepOrigin\": 0,\n      \"PersonList\": [\n        {\n          \"PersonID\": 0\n        }\n      ]\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Edit Custom Payment Group Information",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/ConsumeControl/ConsumeGroup/{ID}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ConsumeGroupInfo\": {\n    \"GroupName\": \"\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Batch Delete Custom Payment Groups",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/ConsumeControl/DelConsumeGroups",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"GroupDeleteRequest\": {\n    \"DeleteAll\": 0,\n    \"ConfirmFlag\": 0,\n    \"ConsumeGroupList\": [\n      {\n        \"GroupID\": 0\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Custom Payment Groups",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/ConsumeControl/GetConsumeGroups",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"GroupListRequest\": {\n    \"SearchCondition\": {\n      \"GroupName\": \"\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Persons To Custom Payment Group",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/ConsumeControl/ConsumeGroup/{ID}/AddPersons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"PersonListRequest\": {\n    \"KeepOrigin\": 0,\n    \"PersonList\": [\n      {\n        \"PersonID\": 0\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Persons From Custom Payment Group",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/ConsumeControl/ConsumeGroup/{ID}/DelPersons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"PersonDeleteRequest\": {\n    \"DeleteAll\": 0,\n    \"ConfirmFlag\": 0,\n    \"PersonList\": [\n      {\n        \"PersonID\": 0\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Persons Of Department And Custom Payment Group",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/ConsumeControl/{ID}/GetPersons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"PersonListRequest\": {\n    \"PageIndex\": 1,\n    \"PageSize\": 100,\n    \"SearchCondition\": {\n      \"ResidueAmountFloor\": 0,\n      \"ResidueAmountUpper\": 0,\n      \"ResidueTimesFloor\": 0,\n      \"ResidueTimesUpper\": 0,\n      \"PersonName\": \"test\",\n      \"PersonCode\": \"1234abc\",\n      \"IncludeSubDepartment\": 0,\n      \"SortInfo\": {\n        \"SortType\": 0,\n        \"Sort\": 0\n      }\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Basic Configuration Information",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/BaseConfig/GeneralConfig"
+          }
+        },
+        {
+          "name": "Top Up Or Pay Allowance To Personal Accounts",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/Account/PersonsTopUporAllowance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"OperationType\": 0,\n  \"RechargeAmount\": 0,\n  \"RechargeTimes\": 0,\n  \"BatchType\": 0,\n  \"ConsumeGroupID\": 0,\n  \"IncludeSubDepartment\": 0,\n  \"PersonRechargeList\": [\n    {\n      \"ID\": 0\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Batch Add Scheduled Allowance Configuration",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/Account/RegularSubsidy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RegularSubsidy\": {\n    \"RechargeAmount\": 0,\n    \"RechargeTimes\": 0,\n    \"DayInMonth\": 0,\n    \"AutoTime\": \"04:00\",\n    \"BatchType\": 0,\n    \"EnableType\": 0,\n    \"ConsumeGroupList\": [\n      {\n        \"ConsumeGroupID\": 0\n      }\n    ],\n    \"PersonsList\": [\n      {\n        \"ID\": 0\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Batch Delete Scheduled Allowance",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/Account/DeleteRegularSubsidy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RegularSubsidy\": {\n    \"BatchType\": 0,\n    \"EnableType\": 0,\n    \"ConsumeGroupList\": [\n      {\n        \"ConsumeGroupID\": 0\n      }\n    ],\n    \"PersonsList\": [\n      {\n        \"ID\": 0\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Scheduled Allowance Configuration",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/Account/RegularSubsidy/{ID}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RegularSubsidy\": {\n    \"RequestType\": 0\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Person Transaction Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/Account/AccountSearch",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"AccountSearchConditions\": {\n    \"PageIndex\": 0,\n    \"PageSize\": 0,\n    \"PersonName\": \"name\",\n    \"TransactionType\": 0,\n    \"OperationBeginTime\": \"2024-08-15T00:00:00Z\",\n    \"OperationEndTime\": \"2024-08-15T23:59:59Z\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Payment Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/ConsumePlugin/v1/Trade/ConsumeLog",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Request\": {\n    \"PageIndex\": 1,\n    \"PageSize\": 100,\n    \"SearchCriteria\": {\n      \"PersonName\": \" \",\n      \"BeginTime\": \"2024-07-31T00:00:00Z\",\n      \"EndTime\": \"2024-07-31T12:00:00Z\",\n      \"ConsumeType\": \"1,2,3\",\n      \"RecordType\": 0,\n      \"Type\": 0,\n      \"PersonType\": 0\n    }\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Commercial Display",
+      "item": [
+        {
+          "name": "Search Data Source",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/focsign/v1/material/dataSource/search",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceType\": \"push\",\n  \"dataType\": \"character\",\n  \"sourceFrom\": \"all\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Data Source",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/focsign/v2/material/dataSource/update",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataType\": \"pic\",\n  \"dataUpdateType\": \"cover\",\n  \"maxMaterialNum\": 2,\n  \"characterInfo\": {\n    \"contentList\": [\n      {\n        \"content\": \"test\",\n        \"playTime\": 1\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Batch Update Data Sources",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/focsign/v2/material/dataSource/update/batch",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataSourceBatchUpdateList\": [\n    {\n      \"dataSourceUUID\": \"uuid\",\n      \"dataType\": \"pic\",\n      \"dataUpdateType\": \"cover\",\n      \"maxMaterialNum\": 2,\n      \"picInfo\": {\n        \"picUrlList\": [\n          {\n            \"type\": \"1\",\n            \"data\": \"1\",\n            \"playTime\": 0\n          }\n        ]\n      },\n      \"characterInfo\": {\n        \"contentList\": [\n          {\n            \"content\": \"1\",\n            \"playTime\": 0\n          }\n        ]\n      },\n      \"tableInfo\": {\n        \"tableList\": [\n          {\n            \"id\": \"0\",\n            \"dataList\": [\n              {\n                \"value\": \"1\"\n              }\n            ],\n            \"row\": 1\n          }\n        ]\n      }\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Search Material Information",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/focsign/v1/material/search",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"materialMoreSearchDescription\": {\n    \"pageSize\": \"1\",\n    \"pageNo\": \"10\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Material Thumbnail",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/focsign/v1/material/thumbnail/get",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"materialId\": \"1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Quick Release Contents",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/focsign/v1/publish/quickPublish",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Program\": {\n    \"Resolution\": {\n      \"resolutionName\": \"1920*1080\",\n      \"imageWidth\": 1920,\n      \"imageHeight\": 1080\n    },\n    \"PageList\": [\n      {\n        \"staticMaterialType\": \"picture\",\n        \"materialNo\": 1,\n        \"PlayDuration\": {\n          \"durationType\": \"materialTime\",\n          \"duration\": 1\n        },\n        \"scaleType\": \"fitXY\"\n      }\n    ]\n  },\n  \"PublishPlan\": {\n    \"playMode\": \"loop\",\n    \"WeeklyPlan\": {\n      \"DayPlanList\": [\n        {\n          \"dayOfWeek\": \"0\",\n          \"TimeSpan\": {\n            \"beginTime\": \"20:30:09\",\n            \"endTime\": \"20:35:09\"\n          }\n        }\n      ]\n    },\n    \"playDuration\": 0,\n    \"endTime\": \"20230927T235959+08\",\n    \"pulishMode\": \"timedPublish\",\n    \"timedPublishTime\": \"1\",\n    \"syncPlay\": true\n  },\n  \"PublishDeviceList\": [\n    0\n  ],\n  \"name\": \"1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Cancel Release Schedule",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/focsign/v1/publish/releasePlan/cancel",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": 26,\n  \"releaseType\": \"byTerminal\",\n  \"terminalNoList\": [\n    14,\n    15\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Search Release Schedule By Task ID",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/focsign/v1/publish/single/releasePlanDetail/search",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 0,\n  \"pageSize\": 2,\n  \"releaseState\": \"all\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Search Terminal Device Information",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/focsign/v1/terminal/control/search",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terminalSearchDescription\": {\n    \"areaID\": 0,\n    \"includeSubArea\": true,\n    \"onlineState\": \"online\",\n    \"keyword\": \"keyword\",\n    \"sortBy\": \"terminalType\",\n    \"orderMode\": \"ascend\",\n    \"pageSize\": 0,\n    \"pageNo\": 0,\n    \"screenSizeTypeList\": [\n      {\n        \"screenSizeType\": \"vertical\"\n      }\n    ]\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Education",
+      "item": [
+        {
+          "name": "Get Class List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/GetClassList",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ClassRequest\": {\n    \"ParentClassID\": -1,\n    \"DepthTraversal\": 0,\n    \"Permission\": 1,\n    \"ClassType\": 0\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Class Or Class Area",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/Edubasicdata/AddClass",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ClassRequest\": {\n    \"ParentClassID\": 0,\n    \"ClassList\": [\n      {\n        \"Class\": {\n          \"Name\": \"Tony\",\n          \"IsClass\": 0,\n          \"ClassType\": 0,\n          \"TeacherList\": [\n            {\n              \"TeacherID\": 0\n            }\n          ]\n        }\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Student To Class",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/Edubasicdata/AddStudent",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"StudentRequest\": {\n    \"StudentList\": [\n      {\n        \"ClassID\": 1,\n        \"ClassType\": 0,\n        \"ClassYear\": \"2024-04\",\n        \"StudentID\": \"10001\",\n        \"FirstName\": \"Tony\",\n        \"LastName\": \"Stark\"\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Teacher Organization",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/Edubasicdata/GetTeacherDepartmentList",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"TeacherDepartmentRequest\": {\n    \"ParentDepartmentID\": 0,\n    \"DepthTraversal\": 0\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Teacher Organization",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/Edubasicdata/AddTeacherDepartment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"TeacherDepartmentRequest\": {\n    \"ParentID\": -1,\n    \"Departments\": {\n      \"TotalNum\": 1,\n      \"Department\": [\n        {\n          \"Name\": \"Name\"\n        }\n      ]\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Teacher To Organization",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/Edubasicdata/AddTeacher",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"TeacherRequest\": {\n    \"TeacherList\": [\n      {\n        \"DepartmentID\": -1,\n        \"TeacherID\": \"10001\",\n        \"FirstName\": \"Tony\",\n        \"LastName\": \"Stark\"\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Import Course Schedule",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/Edubasicdata/ImportCourseTemplate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CourseTemplate\": {\n    \"ClassName\": \"ClassA\",\n    \"BeginTime\": \"2024-04-01\",\n    \"EndTime\": \"2024-07-01\",\n    \"WeekCourseList\": [\n      {\n        \"WeekDay\": 1,\n        \"Index\": 1,\n        \"CourseName\": \"Math\",\n        \"FirstName\": \"Tony\",\n        \"LastName\": \"Stark\",\n        \"TeacherID\": \"10001\",\n        \"ClassroomName\": \"ClassroomA\"\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Course Attendance Summary Information",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/AttndData/ClassAttndSummary",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"AttndSummaryRequest\": {\n    \"ClassID\": 0,\n    \"StartTime\": \"2023-05-22\",\n    \"EndTime\": \"2023-05-28\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Course Attendance Details",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/AttndData/CourseAttndDetail",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"AttndDetailRequest\": {\n    \"CourseID\": \"EEDDFFF\",\n    \"SearchCriteria\": {\n      \"AttndStatus\": [\n        2,\n        3\n      ],\n      \"StudentNameOrNo\": \"Tom\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Student Attendance Result",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/AttndData/StudentAttendance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"StudentAttndRequest\": {\n    \"PageIndex\": -1,\n    \"PageSize\": -1,\n    \"StudentNo\": \"1001\",\n    \"StartDateTime\": \"2023-05-01\",\n    \"EndDateTime\": \"2023-05-01\",\n    \"SearchCriteria\": {\n      \"CourseName\": \"English\",\n      \"SortType\": 1,\n      \"SortColumn\": -1,\n      \"AttndStatus\": [\n        2,\n        3\n      ]\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Student Retrieval Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/StudentRetrieval",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"StudentRetrievalRequest\": {\n    \"PageIndex\": 1,\n    \"PageSize\": 10,\n    \"SearchCriteria\": {\n      \"StudentID\": \"10001\",\n      \"StartTime\": \"2024-03-07\",\n      \"EndTime\": \"2024-03-09\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get School Arrival Record Of Student",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/Education/v1/StudentArrivalRecord",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"StuPersonArrivalRecordRequest\": {\n    \"SearchCriteria\": {\n      \"StudentID\": \"10001\",\n      \"StartTime\": \"2024-03-03\",\n      \"EndTime\": \"2024-03-09\"\n    }\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Intelligent Analysis",
+      "item": [
+        {
+          "name": "Search Face Picture Comparison Information by Camera",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/aiapplication/v1/face/faceMatchRecord",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10,\n  \"startTime\": \"2019-08-26T15:00:00+08:00\",\n  \"endTime\": \"2019-09-16T15:00:00+08:00\",\n  \"cameraIndexCodes\": \"1\",\n  \"personIndexCodes\": \"1\",\n  \"faceGroupIndexCodes\": \"1\",\n  \"temperatureStatus\": -1,\n  \"temperatureThreshold\": \"36\",\n  \"maskStatus\": -1,\n  \"sortField\": \"MatchedTime\",\n  \"orderType\": 1\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logical Resources",
+      "item": [
+        {
+          "name": "Access Point",
+          "item": [
+            {
+              "name": "Get Access Point List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/acsDoor/acsDoorList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Search Access Point List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/acsDoor/advance/acsDoorList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2,\n  \"doorName\": \"Door 01\",\n  \"acsDevIndexCode\": \"46\",\n  \"regionIndexCode\": \"77\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Card Reader Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/reader/search",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"doorIndexCode\": \"938\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alarm IO",
+          "item": [
+            {
+              "name": "Search Alarm Input List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/alarmInput/advance/alarmInputList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2,\n  \"alarmInputName\": \"D1_0.0.0.0\",\n  \"devIndexCode\": \"85\",\n  \"regionIndexCode\": \"95\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Alarm Input List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/alarmInputs",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Alarm Input Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/alarmInputs/indexCode",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"alarmInputIndexCode\": \"1215\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Search Alarm Output List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/alarmOutput/advance/alarmOutputList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10,\n  \"alarmOutputName\": \"0.0.0.0\",\n  \"devIndexCode\": \"85\",\n  \"regionIndexCode\": \"95\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Control Alarm Output",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/alarmOutput/controlling",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"alarmOutputIndexCode\": \"1\",\n  \"action\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Alarm Output List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/alarmOutputs",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Alarm Output Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/alarmOutputs/indexCode",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"alarmOutputIndexCode\": \"1218\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Area",
+          "item": [
+            {
+              "name": "Get Sub Area List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/regions/subRegions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"siteIndexCode\": \"0\",\n  \"parentIndexCode\": \"0\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Area Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/region/indexCode/regionInfo",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"regionIndexCode\": \"28\",\n  \"siteIndexCode\": \"0\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Area List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/regions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2,\n  \"siteIndexCode\": \"0\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Camera List By Area",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/regions/regionIndexCode/cameras",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2,\n  \"regionIndexCode\": \"1\",\n  \"siteIndexCode\": \"0\",\n  \"deviceType\": \"encodeDevice\",\n  \"bRecordSetting\": 1\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Camera",
+          "item": [
+            {
+              "name": "Get Camera Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/cameras/indexCode",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"1213\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Camera List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/cameras",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2,\n  \"siteIndexCode\": \"0\",\n  \"deviceType\": \"encodeDevice\",\n  \"bRecordSetting\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Search Camera List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/camera/advance/cameraList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 100,\n  \"cameraName\": \"Simulator Channel\",\n  \"deviceType\": \"encodeDevice\",\n  \"encodeDevIndexCode\": \"85\",\n  \"devIndexCode\": \"15\",\n  \"regionIndexCode\": \"95\",\n  \"siteIndexCode\": \"0\",\n  \"bRecordSetting\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Solar Camera Mobile Data Traffic Statistics",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/dataStatics/v1/cameras/mobileDataTraffic",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"statisticsType\": 0,\n  \"startTime\": \"2019-05-17T00:00:00+08:00\",\n  \"endTime\": \"2019-05-17T23:59:59+08:00\",\n  \"cameraIndexCodes\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Solar Camera Battery Statistics",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/dataStatics/v1/cameras/batteryCapacity",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"statisticsType\": 0,\n  \"startTime\": \"2019-05-17T00:00:00+08:00\",\n  \"endTime\": \"2019-05-17T23:59:59+08:00\",\n  \"cameraIndexCodes\": \"1\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Face Information",
+          "item": [
+            {
+              "name": "Download Picture By URL",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/application/picture",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"url\": \"Dev://picture/Streaming/tracks/303/?name=405812&size=405812&DEVICE=26&TYPE=0&VSM=0\",\n  \"isHumanSearchPic\": 0\n}"
+                }
+              }
+            },
+            {
+              "name": "Search Face Picture Info In Library",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/face",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"faceGroupIndexCode\": \"1\",\n  \"pageNo\": 1,\n  \"pageSize\": 20\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Face Picture From Library",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/face/deletion",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"indexCodes\": [\n     \"4\"\n  ],\n  \"faceGroupIndexCode\": \"1\",\n  \"deleteFromOrg\": \"0\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Add Face Picture",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/face/single/addition",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"personIndexCode\": \"1\",\n  \"faceGroupIndexCode\": \"1\",\n  \"faceInfo\": {\n     \"personGivenName\": \"san\",\n     \"personFamilyName\": \"zhang\",\n     \"sex\": \"1\"\n  },\n  \"facePic\": {\n     \"faceBinaryData\": \"/9j/4AAQSkZJRgABAQEAAAAAAAD/4QBCRXhpZgAATU\"\n  }\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Face Picture Library",
+          "item": [
+            {
+              "name": "Search Face Picture Library List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/face/group",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"indexCodes\": [\n     \"2\"\n  ],\n  \"name\": \"\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Face Picture Library",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/face/group/batch/deletion",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"indexCodes\": [\n     \"1\"\n  ]\n}"
+                }
+              }
+            },
+            {
+              "name": "Add Face Picture Library",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/face/group/single/addition",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"name\",\n  \"description\": \"test\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Face Picture Library",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/face/group/single/update",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"indexCode\": \"1\",\n  \"name\": \"name_mod\",\n  \"description\": \"test_mod\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Face Picture Library List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/face/groupList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 6\n}"
+                }
+              }
+            },
+            {
+              "name": "Apply Face Picture Library To Device",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/plan/recognition/black/restart",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"indexCodes\": \"1\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Organization",
+          "item": [
+            {
+              "name": "Get Sub Organization List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/org/parentOrgIndexCode/subOrgList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"parentOrgIndexCode\": \"1\",\n  \"pageNo\": 1,\n  \"pageSize\": 10\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Root Organization Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/org/rootOrg"
+              }
+            },
+            {
+              "name": "Add Organization",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/org/single/add",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orgName\": \"name\",\n  \"parentIndexCode\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Organization",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/org/single/delete",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orgIndexCode\": \"4\",\n  \"adminPassword\": \"12345\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Organization",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/org/single/update",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orgName\": \"name_test\",\n  \"orgIndexCode\": \"4\",\n  \"parentIndexCode\": \"1\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Person",
+          "item": [
+            {
+              "name": "Update Person Fingerprints",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/fingerPrints/update",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"personId\": \"1\",\n  \"fingerPrint\": [\n     {\n        \"fingerPrintIndexCode\": \"1\",\n        \"fingerPrintName\": \"fringe_pringt_01\",\n        \"fingerPrintData\": \"228697F1AD0146C8D00\",\n        \"relatedCardNo\": \"1123\"\n     }\n  ]\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Person Custom Fields List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/customFields",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Person Custom Fields",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/personId/customFieldsUpdate",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"personId\": \"1150\",\n  \"list\": [\n     {\n        \"id\": \"12\",\n        \"customFiledName\": \"ssss\",\n        \"customFieldType\": 2,\n        \"customFieldValue\": \"2354\"\n     }\n  ]\n}"
+                }
+              }
+            },
+            {
+              "name": "Verify Face Picture Validity",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/acs/v1/faceCheck",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"faceData\": \"4AAQSkzFYSEbxpSTWIl7lb2dtYSUW4zd9E/K\",\n  \"acsDevIndexCode\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Apply Person Access Level Settings To Device",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/visitor/v1/auth/reapplication",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ImmediateDownload\": 0,\n  \"personIds\": \"1\",\n  \"doorIndexCodes\": \"2\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Application Result Status",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/acs/v1/auth/applicationResult",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"applicationResultType\": 1,\n  \"pageNo\": 1,\n  \"pageSize\": 2,\n  \"type\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Add Custom Field",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/customFields/single/add",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"customFieldList\": {\n     \"customField\": [\n        {\n          \"customFieldName\": \"123\",\n          \"customFieldType\": 0,\n          \"presetValueList\": {\n             \"presetValue\": [\n                {\n                   \"value\": \"0\",\n                   \"ID\": \"1\"\n                }\n             ]\n          },\n          \"isPublic\": 0,\n          \"isShow\": 1\n        }\n     ]\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Custom Field",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/customFields/single/modify",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"customFieldList\": {\n     \"customField\": [\n        {\n          \"customFieldId\": \"1\",\n          \"customFieldName\": \"123\",\n          \"isShow\": 1,\n          \"customFieldType\": 3,\n          \"presetValueList\": {\n             \"presetValue\": [\n                {\n                   \"value\": \"0\",\n                   \"ID\": \"1\"\n                }\n             ]\n          }\n        }\n     ]\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Custom Field",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/customFields/single/delete",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"customFieldId\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Person QR Code Config",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/qrcodeconfig/get"
+              }
+            },
+            {
+              "name": "Update Person QR Code Config",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/qrcodeconfig/update",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"data\": {\n     \"type\": 0,\n     \"validTime\": 0,\n     \"validTimeUnit\": 0\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Person Static QR Code",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/staticqrcode/get",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"data\": {\n     \"cardNo\": \"\"\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Person Dynamic QR Code",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/dynamicqrcode/get",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"data\": {\n     \"employeeID\": \"123456\",\n     \"validity\": 60,\n     \"openLockTimes\": 1,\n     \"qrType\": 0\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Person Delete Double Authentication Config",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/deleteconfig/get"
+              }
+            },
+            {
+              "name": "Update Person Palm Print Or Vein",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/palmPrintVein/update",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"personId\": \"8\",\n  \"personCode\": \"123\",\n  \"palmPrintVein\": [\n     {\n        \"palmPrintVeinIndexCode\": \"\",\n        \"palmPrintVeinName\": \"Palm1\",\n        \"printRawData\": \"jasgdha\",\n        \"printModelData\": \"jasgdha\",\n        \"veinRawData\": \"jasgdha\",\n        \"veinModelData\": \"jasgdha\",\n        \"modelVesion\": \"NT985601_2\"\n     }\n  ]\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Person Iris",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/person/iris/update",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"personId\": \"8\",\n  \"personCode\": \"8\",\n  \"iris\": [\n     {\n        \"irisData\": \"123\",\n        \"irisRawData\": \"123\"\n     }\n  ]\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Site",
+          "item": [
+            {
+              "name": "Get Site List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/site/siteList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Site Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/site/indexCode/siteInfo",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"siteIndexCode\": \"17\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Search Site List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/site/advance/siteList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10,\n  \"siteName\": \"VMSPlatform\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vehicle",
+          "item": [
+            {
+              "name": "Get Vehicle Group List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicleGroup/vehicleGroupList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10\n}"
+                }
+              }
+            },
+            {
+              "name": "Add Vehicle Group",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicleGroup/single/add",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vehicleGroupName\": \"test\",\n  \"description\": \"test\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Vehicle Group",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicleGroup/single/update",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vehicleGroupIndexCode\": \"4\",\n  \"vehicleGroupName\": \"test_mod\",\n  \"description\": \"test_mod\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Vehicle Group",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicleGroup/single/delete",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vehicleGroupIndexCode\": \"4\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Vehicle List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicle/vehicleList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10,\n  \"vehicleGroupIndexCode\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Vehicle Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicle/indexCode/vehicleInfo",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vehicleIndexCode\": \"7\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Search Vehicle List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicle/advance/vehicleList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10,\n  \"personName\": \"\",\n  \"plateNo\": \"N746\",\n  \"phoneNo\": \"\",\n  \"vehicleGroupIndexCode\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Add Vehicle",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicle/single/add",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"plateNo\": \"NN7464\",\n  \"plateCategory\": \"123\",\n  \"plateArea\": 258,\n  \"personId\": \"1149\",\n  \"phoneNo\": \"111111\",\n  \"vehicleColor\": 3,\n  \"vehicleGroupIndexCode\": \"1\",\n  \"personGivenName\": \"ma\",\n  \"personFamilyName\": \"jack\",\n  \"effectiveDate\": \"2022-03-21T00:00:00+08:00\",\n  \"expiredDate\": \"2023-03-25T23:59:59+08:00\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Update Vehicle",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicle/single/update",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vehicleId\": \"21\",\n  \"plateNo\": \"74651544B\",\n  \"plateCategory\": \"123\",\n  \"plateArea\": 258,\n  \"plateAreaName\": \"DXB\",\n  \"personId\": \"1149\",\n  \"phoneNo\": \"111111111111\",\n  \"vehicleColor\": 3,\n  \"vehicleGroupIndexCode\": \"1\",\n  \"personFamilyName\": \"dong\",\n  \"personGivenName\": \"zhaod\",\n  \"effectiveDate\": \"2022-03-21T00:00:00+08:00\",\n  \"expiredDate\": \"2023-03-25T23:59:59+08:00\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete Vehicle",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicle/single/delete",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vehicleId\": \"12\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Vehicle Area Settings",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicle/area/get"
+              }
+            },
+            {
+              "name": "Update Vehicle Area Settings",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/vehicle/area/update",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"currentArea\": 1,\n  \"plateSize\": 0,\n  \"plateType\": 0,\n  \"plateColor\": 1\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vehicle On-Board",
+          "item": [
+            {
+              "name": "Get Vehicle List Linked To On-Board Devices",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/mobilevehicle/mobilevehicleList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Vehicle Info Linked To On-Board Device",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/mobileVehicle/indexCode/mobileVehicleInfo",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"mobilevehicleIndexCode\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Search Vehicle List Linked To On-Board Devices",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/mobilevehicle/advanced/mobilevehicleList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10,\n  \"mobilevehicleName\": \"10.18.68.12\",\n  \"devIndexCode\": \"1\"\n}"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "On-Board Monitoring",
+      "item": [
+        {
+          "name": "Get On-Board Device GPS Statistics",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/mobilesurveillance/v1/gpsDetails",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 15,\n  \"mobilevehicleIndexCodes\": \"1,2\",\n  \"startTime\": \"2022-02-10T15:00:00+08:00\",\n  \"endTime\": \"2022-02-11T16:00:00+08:00\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Search On-Board Device Event Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/mobilesurveillance/v1/recordOverview",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"mobilevehicleIndexCodes\": \"1,2\",\n  \"eventTypes\": \"330203,330003\",\n  \"beginTime\": \"2022-02-14T15:00:00+08:00\",\n  \"endTime\": \"2022-02-15T15:00:00+08:00\",\n  \"centerLongitude\": \"0.0\",\n  \"centerLatitude\": \"0.0\",\n  \"radius\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "Get On-Board Device Event Info",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/mobilesurveillance/v1/single/record",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobilevehicleIndexCode\": \"1\",\n  \"eventIndexCode\": \"BF1A2B849C5E4EDC858EF295A4E7DD2D\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Download On-Board Monitoring Media",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/mobilesurveillance/v1/picture_download",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"Dev://picture/Streaming/tracks/303/?name=405812&size=405812&DEVICE=26&TYPE=0&VSM=0\",\n  \"picType\": 0\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Physical Resources",
+      "item": [
+        {
+          "name": "DeepinMind Servers",
+          "item": [
+            {
+              "name": "Get DeepinMind Server List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/intelligentServer/intelligentServerList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Encoding Devices",
+          "item": [
+            {
+              "name": "Get Encoding Device List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/encodeDevice/encodeDeviceList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Encoding Device Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/encodeDevice/indexCode/encodeDeviceInfo",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"encodeDevIndexCode\": \"85\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Search Encoding Device List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/encodeDevice/advance/encodeDeviceList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10,\n  \"encodeDevName\": \"10.18.66.25\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Wake Up Solar Device",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/device/indexCode/wakeUp",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"deviceIndexCode\": \"1\",\n  \"cameraIndexCode\": \"1\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "On-board Devices",
+          "item": [
+            {
+              "name": "Get On-board Device List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/mobileDevice/mobileDeviceList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Get On-board Device Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/mobileDevice/indexCode/mobileDeviceInfo",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"mobileDevIndexCode\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Search On-board Device List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/mobileDevice/advance/mobileDeviceList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2,\n  \"mobileDevName\": \"10.18.64.39\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Recording Servers",
+          "item": [
+            {
+              "name": "Get Recording Server List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/recordServer/recordServerList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Recording Server Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/recordServer/indexCode/recordServerInfo",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"recordServerIndexCode\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Camera Recording Status",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/recordServer/recordStatus",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2,\n  \"recordServerIndexCode\": \"1\",\n  \"poolID\": \"0\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Streaming Servers",
+          "item": [
+            {
+              "name": "Get Streaming Server List",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/streamServer/streamServerList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "System Management Server",
+          "item": [
+            {
+              "name": "Get System Management Server Info",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/resource/v1/videoManagementServer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Vehicle and Parking",
+      "item": [
+        {
+          "name": "Get Vehicle Pictures From Passing Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/pms/v1/image",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"picUri\": \"0B4E92A30AF914C1285613A4FBD9F761F\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Search Vehicle Passing Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/pms/v1/crossRecords/page",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cameraIndexCode\": \"1\",\n  \"plateNo\": \"a123456\",\n  \"ownerName\": \"aaa\",\n  \"contact\": \"123\",\n  \"startTime\": \"2018-07-26T15:00:00+08:00\",\n  \"endTime\": \"2018-07-26T16:00:00+08:00\",\n  \"pageNo\": 1,\n  \"pageSize\": 10,\n  \"sortField\": \"PassTime\",\n  \"orderType\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Parking Lot List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/parkinglot/list"
+          }
+        },
+        {
+          "name": "Get Floor List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/floor/list",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parkingLotIndexCode\": \"1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Floor Occupancy Overview",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/floor/overview",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parkingLotIndexCode\": \"1\",\n  \"floorIndexCode\": \"14\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Parking Space Real-Time Status",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/floor/parkingspace/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"floorIndexCode\": \"1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Parking Lot Passing Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/parkinglot/passageway/record",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"queryInfo\": {\n    \"parkingLotIndexCode\": \"1\",\n    \"beginTime\": \"2021-07-21T00:00:00+08:00\",\n    \"endTime\": \"2021-07-21T23:59:59+08:00\",\n    \"ownerName\": \"alan\",\n    \"plateLicense\": \"BK07WCU\",\n    \"directionType\": -1,\n    \"allowResult\": -1,\n    \"sortField\": \"EnterTime\",\n    \"orderType\": 1\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Vehicle Parking Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/parkingspace/record",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"queryInfo\": {\n    \"parkingLotIndexCode\": \"1\",\n    \"floorIndexCode\": \"1\",\n    \"beginTime\": \"2021-07-21T00:00:00+08:00\",\n    \"endTime\": \"2021-07-21T23:59:59+08:00\",\n    \"spaceSerial\": \"1\",\n    \"plateLicense\": \"KY56NKD\",\n    \"statusType\": 0,\n    \"sortField\": \"OccurTime\",\n    \"orderType\": 1\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Calculate Parking Fee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/parkingfee/calculate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateLicense\": \"2700H\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Confirm Parking Fee Payment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/parkingfee/confirm",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateLicense\": \"2700H\",\n  \"immediatelyLeave\": 0,\n  \"fee\": \"200\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Vehicle To Blocklist",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/vehicle/blocklist/add",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateLicense\": \"123\",\n  \"personGivenName\": \"KaiRui\",\n  \"personFamilyName\": \"Jin\",\n  \"phoneNo\": \"1-1807894561\",\n  \"description\": \"xxxxxx\",\n  \"effectiveDate\": \"2022-03-21T00:00:00+08:00\",\n  \"expiredDate\": \"2023-03-25T23:59:59+08:00\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Search Vehicle Blocklist",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/vehicle/blocklist/get",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 1,\n  \"pageSize\": 10,\n  \"keyWords\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Edit Vehicle In Blocklist",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/vehicle/blocklist/modify",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleIndexCode\": \"1\",\n  \"plateLicense\": \"9999\",\n  \"personGivenName\": \"KaiRui\",\n  \"personFamilyName\": \"Jin\",\n  \"phoneNo\": \"1-1807894561\",\n  \"description\": \"xxxxxx\",\n  \"effectiveDate\": \"2022-03-21T00:00:00+08:00\",\n  \"expiredDate\": \"2023-03-25T23:59:59+08:00\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Vehicle From Blocklist",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/vehicle/blocklist/delete",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleIndexCodes\": \"1,2,3\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Reserve Parking Spaces",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/parkingguidance/parkingspace/batchrelate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"spaceIndexCodes\": \"1\",\n  \"leftSpaceCount\": 0,\n  \"spaceType\": 1,\n  \"floorIndexCode\": \"1\",\n  \"relatePlateNumberIndexCodes\": \"1,2\",\n  \"relatePlateListIndexCodes\": \"1\",\n  \"parkingRuleEnable\": 1,\n  \"parkingRuleType\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Parking Spaces Of All Floors",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/parkingguidance/parkingspace/get",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"floorIndexCode\": \"\",\n  \"pageIndex\": 1,\n  \"pageSize\": 50\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Single Parking Space Status",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/vehicle/v1/parkingguidance/singleparkingspace/get",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"spaceIndexCode\": \"1\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Video",
+      "item": [
+        {
+          "name": "AI Application",
+          "item": [
+            {
+              "name": "Get People Counting Statistics By Time",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/people/statisticsTotalNumByTime",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 20,\n  \"cameraIndexCodes\": \"1\",\n  \"statisticsType\": 0,\n  \"startTime\": \"2018-07-26T15:00:00+08:00\",\n  \"endTime\": \"2018-07-26T16:00:00+08:00\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Passenger Flow Statistics",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/people/passengerFlowStatistics",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"statisticsRequest\": {\n    \"searchCriteria\": {\n      \"resourceInfo\": {\n        \"type\": 1,\n        \"resource\": [\n          {\n            \"siteIndexCode\": \"0\",\n            \"resourceIndexCode\": [\n              \"11\",\n              \"6\"\n            ]\n          }\n        ]\n      },\n      \"beginTime\": \"2026-04-28T00:00:00+08:00\",\n      \"endTime\": \"2026-04-28T23:59:59+08:00\",\n      \"reportType\": 0,\n      \"accuracy\": 2,\n      \"peakValueAccuracy\": 2,\n      \"needRemoveRepeat\": 1,\n      \"dataType\": [\n        1\n      ],\n      \"contrastTime\": [\n        {\n          \"type\": 1,\n          \"beginTime\": \"2026-04-27T00:00:00+08:00\",\n          \"endTime\": \"2026-04-27T23:59:59+08:00\"\n        }\n      ]\n    }\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Person Feature Statistics",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/people/attributesStatistics",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"personStatisticsRequest\": {\n    \"searchCriteria\": {\n      \"resourceInfo\": {\n        \"type\": 1,\n        \"resourceIndexCode\": [\n          \"11\",\n          \"12\"\n        ]\n      },\n      \"beginTime\": \"2024-01-15T08:00:00+08:00\",\n      \"endTime\": \"2024-01-15T20:00:00+08:00\",\n      \"reportType\": 0,\n      \"accuracy\": 2\n    }\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Intelligent Analysis Scenario",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/sceneConfig"
+              }
+            },
+            {
+              "name": "Get Store Configurations",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/shops",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"shopConfigRequest\": {\n    \"pageNo\": 1,\n    \"pageSize\": 20,\n    \"filter\": {\n      \"keyword\": \"Beijing Flagship Store\",\n      \"shopIndexCode\": \"shop001,shop002\",\n      \"areaIndexCode\": \"area001,area002\",\n      \"includedSubArea\": 1,\n      \"siteIndexCode\": \"site001\",\n      \"capability\": \"event_pdc,face_attributes\"\n    }\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Store Linked Resources",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/shop/resource",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"shopResourceRequest\": {\n    \"shopIndexCode\": \"12\",\n    \"capability\": \"event_pdc,face_attributes\",\n    \"resourceType\": 1\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Store Entrances/Exits",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/shop/gateInfo",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"shopGateRequest\": {\n    \"shopIndexCode\": \"1\",\n    \"gateIndexCodes\": \"1\"\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Real-Time Statistics Of Resource Groups",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/people/resourceGroupRealTimeCount",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"resourceGroupIndexCodes\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get List Of Resource Groups",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/people/advance/resourceGroupList",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 10,\n  \"siteIndexCode\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Heat Map Information",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/aiapplication/v1/people/statisticsHeatMapByTime",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"1\",\n  \"statisticsType\": 0,\n  \"beginTime\": \"2022-02-16T15:00:00+08:00\",\n  \"endTime\": \"2022-02-16T16:00:00+08:00\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Download and Events",
+          "item": [
+            {
+              "name": "Download Recordings",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/download",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"url\": \"rtsp://10.18.66.12:554/sms/Eurl/commonvideobiz_yL3BB0IJEfmZXqcbVjpen%2BT1uYbybvT38kqzRR6XaakK2GcRosSrw4A9o%2FFtIeHzaYm3O%2Fmn%2FWOZwbiNhwhk9eTw1oiI8YFyIY5tLp5CJu7RnoINpei1W22NqnwyDt%2FcnLNZEnXoejzLazu9A0oXWVwxjsV99%2FtZXqJx8K7601%2BywBbErC80PzfVyFWd5HKmEz8NVdNCVT2fqokL8868ffQi8uMYNLXYSE0FEsqunLs%3D\",\n  \"authentication\": \"Fsd8eugj2+RYG6EKEgN8/EHy6o5XPdkxD8t7Dy+EH6moE4G0X9+60C7PucJ8TlZOdGIK3lH5W7JDFdrercIsiJb1bl9Y52PGA/K/QXIff+84XMQ=\",\n  \"beginTime\": \"2022-09-07T19:38:16+08:00\",\n  \"endTime\": \"2022-09-07T19:38:16+08:00\",\n  \"videoType\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Download Progress And URL",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/downloadURL",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"downloadID\": \"1\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Tags Of Person/Vehicle-Detected Videos",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/event/searchLabels",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 2,\n  \"cameraIndexCode\": \"1\",\n  \"startTime\": \"2022-08-06T09:58:39+08:00\",\n  \"endTime\": \"2022-08-06T09:58:39+08:00\",\n  \"eventLabel\": 1\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Face and Body Recognition",
+          "item": [
+            {
+              "name": "Detect Human Body In Picture",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/body/v1/application/pictureRecognition",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"protocolType\": 1,\n  \"intelligentServerIndexCode\": \"3\",\n  \"encodeDeviceIndexCode\": \"1\",\n  \"pictureData\": \"base64\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Model Human Body In Picture",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/body/v1/application/pictureModel",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"protocolType\": 1,\n  \"intelligentServerIndexCode\": \"1\",\n  \"encodeDeviceIndexCode\": \"1\",\n  \"pictureData\": \"test\",\n  \"data\": {\n    \"Rect\": {\n      \"height\": \"0.81\",\n      \"width\": \"0.15\",\n      \"x\": \"0.21\",\n      \"y\": \"0.12\"\n    }\n  }\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Matched Human Bodies By Condition",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/body/v1/application/captureSearch",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"protocolType\": 1,\n  \"intelligentServerIndexCode\": \"1\",\n  \"encodeDeviceIndexCode\": \"1\",\n  \"cameraIndexCodes\": \"1,2,3\",\n  \"modelData\": \"test\",\n  \"startTime\": \"2022-08-13T17:30:08+08:00\",\n  \"endTime\": \"2022-08-13T17:30:08+08:00\",\n  \"similarity\": \"0.89\",\n  \"sortType\": \"time\",\n  \"maxResults\": 100,\n  \"searchResultPosition\": 0,\n  \"modelMaxNum\": 100\n}"
+                }
+              }
+            },
+            {
+              "name": "Detect And Model Faces In Picture",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/application/pictureRecognitionModel",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"protocolType\": 1,\n  \"intelligentServerIndexCode\": \"3\",\n  \"encodeDeviceIndexCode\": \"1\",\n  \"pictureData\": \"base64\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Matched Faces By Conditions",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/application/captureSearch",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"intelligentServerIndexCode\": \"3\",\n  \"cameraIndexCodes\": \"1,2,3\",\n  \"targetModelData\": \"test\",\n  \"maxResults\": 100,\n  \"startTime\": \"2022-08-15T17:30:08+08:00\",\n  \"endTime\": \"2022-08-18T17:30:08+08:00\",\n  \"similarityMin\": \"0.01\",\n  \"similarityMax\": \"0.98\",\n  \"sortType\": \"time\",\n  \"searchResultPosition\": 0,\n  \"modelMaxNum\": 100\n}"
+                }
+              }
+            },
+            {
+              "name": "Get List Of Intelligent Recognition Tasks",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/intelligentRecognition/tasks",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 100,\n  \"taskType\": 1,\n  \"analyzeDeviceType\": 3\n}"
+                }
+              }
+            },
+            {
+              "name": "Compare Face Pictures One Versus One",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/application/oneToOne",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"intelligentServerIndexCode\": \"1\",\n  \"targetModelData\": \"test\",\n  \"contrastModelData\": \"test\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Verify Identity One Versus Multiple",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/frs/v1/application/oneToMany",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"minSimilarity\": \"0.5\",\n  \"facePicModelData\": \"dfhgsrtASgfdf\",\n  \"faceGroupIndexCodes\": \"1,2\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Patrols and Presets",
+          "item": [
+            {
+              "name": "Add A Patrol To A Camera",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/patrols/addition",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"89\",\n  \"patrolIndex\": 1,\n  \"patrolName\": \"1\",\n  \"patrolPointInfoList\": [\n    {\n      \"presetIndex\": 1,\n      \"speed\": 1,\n      \"dwellTime\": 15\n    }\n  ]\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete A Patrol Of A Camera",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/patrols/deletion",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"89\",\n  \"patrolIndex\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Patrol Information By Patrol No",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/patrols/patrolIndex/patrolInfo",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"89\",\n  \"patrolIndex\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Search For Patrol Information",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/patrols/searches",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"89\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Add A Preset To A Camera",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/presets/addition",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"89\",\n  \"presetName\": \"2\",\n  \"presetIndex\": 2\n}"
+                }
+              }
+            },
+            {
+              "name": "Delete A Preset Of A Camera",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/presets/deletion",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"89\",\n  \"presetIndex\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Search For Preset Information",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/presets/searches",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"89\"\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Streaming and PTZ",
+          "item": [
+            {
+              "name": "Get Streaming URL For Playback",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/cameras/playbackURLs",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"beginTime\": \"2021-04-26T00:00:00+08:00\",\n  \"endTime\": \"2021-04-26T01:00:00+08:00\",\n  \"cameraIndexCode\": \"19\",\n  \"recordType\": \"0\",\n  \"protocol\": \"rtsp\",\n  \"transmode\": \"1\",\n  \"uuid\": \"\",\n  \"mergeSegment\": 0,\n  \"storageLocation\": 0,\n  \"internationalStandardTime\": 0\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Streaming URL For Live View",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/cameras/previewURLs",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"1\",\n  \"streamType\": 0,\n  \"protocol\": \"rtsp\",\n  \"transmode\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Batch Get Streaming URLs For Live View",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v2/cameras/previewURLs",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"1\",\n  \"streamType\": 0,\n  \"protocol\": \"rtsp\",\n  \"transmode\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Two-Way Audio URL For Camera",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/cameras/talkURLs",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"1\",\n  \"transmode\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Get Two-Way Audio URL For Device",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/device/talkURLs",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"1\",\n  \"transmode\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Control The PTZ After Starting Live View",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/ptzs/controlling",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"89\",\n  \"command\": \"GOTO_PRESET\",\n  \"presetIndex\": 1,\n  \"action\": 0,\n  \"speed\": 40,\n  \"patrolIndex\": 1\n}"
+                }
+              }
+            },
+            {
+              "name": "Capture Real-Time Picture Via Camera",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": "{{baseUrl}}/artemis/api/video/v1/camera/capture",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cameraIndexCode\": \"1\"\n}"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Video Tracing",
+      "item": [
+        {
+          "name": "Get Check Point Information",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/goodsmanager/v1/GetCheckPointInfo",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"PageSize\": 10,\n  \"PageIndex\": 1,\n  \"SearchName\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Batch Import Barcode Scanning Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/goodsmanager/v1/ImportPackageRecord",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"RecordImportRequest\": {\n    \"Total\": 1,\n    \"RecordList\": [\n      {\n        \"CheckpointName\": \"Point 1\",\n        \"OrderNo\": \"C11937239903\",\n        \"OccurrenceTime\": \"2025-04-22T10:01:59+08:00\"\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Parcel Scanning Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/goodsmanager/v1/PackageRecord",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"BarCodeLogRequest\": {\n    \"PageIndex\": 1,\n    \"PageSize\": 100,\n    \"Filter\": {\n      \"BarCode\": \"69244122354\",\n      \"BeginTime\": \"2018-07-26T15:00:00+08:00\",\n      \"EndTime\": \"2019-07-26T15:00:00+08:00\"\n    }\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Visitor Management",
+      "item": [
+        {
+          "name": "Add Visitor Reservation (V1)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/appointment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receptionistId\": \"\",\n  \"visitStartTime\": \"2018-07-26T15:00:00+08:00\",\n  \"visitEndTime\": \"2018-07-26T16:00:00+08:00\",\n  \"visitPurposeType\": 0,\n  \"visitPurpose\": \"visitor\",\n  \"visitorInfoList\": [\n    {\n      \"VisitorInfo\": {\n        \"visitorFamilyName\": \"san\",\n        \"visitorGivenName\": \"zhang\",\n        \"visitorGroupName\": \"Visitors\",\n        \"gender\": 1,\n        \"email\": \"999999@qq.com\",\n        \"phoneNo\": \"13600000000\",\n        \"plateNo\": \"A666\",\n        \"companyName\": \"AAA\",\n        \"certificateType\": 111,\n        \"certificateNo\": \"null\",\n        \"remark\": \"visitor\",\n        \"accessInfo\": {\n          \"electrostaticDetectionType\": 0,\n          \"qrCodeValidNum\": 0\n        },\n        \"watchListInfo\": [\n          {\n            \"enableRegister\": 1,\n            \"ID\": \"0\",\n            \"Type\": \"1\"\n          }\n        ],\n        \"faces\": [\n          {\n            \"faceData\": \"/9j/4AAQSkZRgABAQEAAAAAAAD/4QBCRXhpZgAATU..\"\n          }\n        ],\n        \"fingerPrint\": [\n          {\n            \"fingerPrintIndexCode\": \"1\",\n            \"fingerPrintName\": \"fringe_pringt_01\",\n            \"fingerPrintData\": \"46504D228697F1AD0146C8D00\",\n            \"relatedCardNo\": \"123456\"\n          }\n        ],\n        \"cards\": [\n          {\n            \"cardNo\": \"123456\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Edit Visitor Reservation (V1)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/appointment/update",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointRecordId\": \"1\",\n  \"receptionistId\": \"1\",\n  \"visitStartTime\": \"2018-07-26T15:00:00+08:00\",\n  \"visitEndTime\": \"2018-07-26T16:00:00+08:00\",\n  \"visitPurposeType\": 0,\n  \"visitPurpose\": \"visitor\",\n  \"visitorInfoList\": [\n    {\n      \"VisitorInfo\": {\n        \"visitorFamilyName\": \"san\",\n        \"visitorGivenName\": \"zhang\",\n        \"visitorGroupName\": \"Visitors\",\n        \"gender\": 1,\n        \"email\": \"null\",\n        \"phoneNo\": \"13600000000\",\n        \"plateNo\": \"BBBA\",\n        \"companyName\": \"AAA\",\n        \"certificateType\": 111,\n        \"certificateNo\": \"null\",\n        \"remark\": \"null\",\n        \"accessInfo\": {\n          \"electrostaticDetectionType\": 0,\n          \"qrCodeValidNum\": 0\n        },\n        \"faces\": [\n          {\n            \"faceData\": \"/9j/4AAQSkZJRgABAQEAAAAAAAD/4QBCRXhpZgAATU..\"\n          }\n        ],\n        \"fingerPrint\": [\n          {\n            \"fingerPrintIndexCode\": \"1\",\n            \"fingerPrintName\": \"fringe_pringt_01\",\n            \"fingerPrintData\": \"46504D228697F1AD0146C8D00\",\n            \"relatedCardNo\": \"123456\"\n          }\n        ],\n        \"cards\": [\n          {\n            \"cardNo\": \"123456\"\n          }\n        ],\n        \"customField\": [\n          {\n            \"customID\": \"1\",\n            \"customFieldName\": \"\",\n            \"customFieldType\": 0,\n            \"customFieldValue\": \"\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Check In a Visitor",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/registerment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receptionistId\": \"\",\n  \"visitStartTime\": \"2018-07-26T15:00:00+08:00\",\n  \"visitEndTime\": \"2018-07-26T16:00:00+08:00\",\n  \"visitPurposeType\": 0,\n  \"visitPurpose\": \"visitor\",\n  \"visitorInfoList\": [\n    {\n      \"VisitorInfo\": {\n        \"visitorFamilyName\": \"san\",\n        \"visitorGivenName\": \"zhang\",\n        \"visitorGroupName\": \"Visitors\",\n        \"gender\": 1,\n        \"email\": \"999999@qq.com\",\n        \"phoneNo\": \"13600000000\",\n        \"plateNo\": \"A666\",\n        \"companyName\": \"AAA\",\n        \"certificateType\": 111,\n        \"certificateNo\": \"null\",\n        \"remark\": \"visitor\",\n        \"accessInfo\": {\n          \"electrostaticDetectionType\": 0,\n          \"qrCodeValidNum\": 0\n        },\n        \"watchListInfo\": [\n          {\n            \"enableRegister\": 1,\n            \"ID\": \"0\",\n            \"Type\": \"1\"\n          }\n        ],\n        \"faces\": [\n          {\n            \"faceData\": \"/9j/4AAQSkZRgABAQEAAAAAAAD/4QBCRXhpZgAATU..\"\n          }\n        ],\n        \"fingerPrint\": [\n          {\n            \"fingerPrintIndexCode\": \"1\",\n            \"fingerPrintName\": \"fringe_pringt_01\",\n            \"fingerPrintData\": \"46504D228697F1AD0146C8D00\",\n            \"relatedCardNo\": \"123456\"\n          }\n        ],\n        \"cards\": [\n          {\n            \"cardNo\": \"123456\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Edit Visitor Check-In Information",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/registerment/update",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointRecordId\": \"1\",\n  \"receptionistId\": \"1\",\n  \"visitStartTime\": \"2018-07-26T15:00:00+08:00\",\n  \"visitEndTime\": \"2018-07-26T16:00:00+08:00\",\n  \"visitPurposeType\": 0,\n  \"visitPurpose\": \"visitor\",\n  \"visitorInfoList\": [\n    {\n      \"VisitorInfo\": {\n        \"visitorFamilyName\": \"san\",\n        \"visitorGivenName\": \"zhang\",\n        \"visitorGroupName\": \"Visitors\",\n        \"gender\": 1,\n        \"email\": \"null\",\n        \"phoneNo\": \"13600000000\",\n        \"plateNo\": \"BBBA\",\n        \"companyName\": \"AAA\",\n        \"certificateType\": 111,\n        \"certificateNo\": \"null\",\n        \"remark\": \"null\",\n        \"accessInfo\": {\n          \"electrostaticDetectionType\": 0,\n          \"qrCodeValidNum\": 0\n        },\n        \"faces\": [\n          {\n            \"faceData\": \"/9j/4AAQSkZJRgABAQEAAAAAAAD/4QBCRXhpZgAATU..\"\n          }\n        ],\n        \"fingerPrint\": [\n          {\n            \"fingerPrintIndexCode\": \"1\",\n            \"fingerPrintName\": \"fringe_pringt_01\",\n            \"fingerPrintData\": \"46504D228697F1AD0146C8D00\",\n            \"relatedCardNo\": \"123456\"\n          }\n        ],\n        \"cards\": [\n          {\n            \"cardNo\": \"123456\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Make a Visitor Reservation (V2)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v2/appointment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receptionistId\": \"2\",\n  \"appointStartTime\": \"2021-05-09T15:00:00+08:00\",\n  \"appointEndTime\": \"2021-05-14T15:00:00+08:00\",\n  \"visitReasonType\": 0,\n  \"visitReasonDetail\": \"null\",\n  \"accessInfo\": {\n    \"accessLevelList\": [\n      {\n        \"accessLevel\": {\n          \"id\": 1,\n          \"baseInfo\": {\n            \"name\": \"1\"\n          }\n        }\n      }\n    ]\n  },\n  \"visitorInfoList\": [\n    {\n      \"VisitorInfo\": {\n        \"visitorFamilyName\": \"mmm\",\n        \"visitorGivenName\": \"yyyy\",\n        \"visitorGroupName\": \"Visitors\",\n        \"gender\": 1,\n        \"email\": \"1@qq.com\",\n        \"phoneNo\": \"13600000000\",\n        \"plateNo\": \"Zhe A\",\n        \"companyName\": \"hik\",\n        \"certificateType\": 111,\n        \"certificateNo\": \"dddd2234\",\n        \"remark\": \"null\",\n        \"accessInfo\": {\n          \"electrostaticDetectionType\": 0,\n          \"qrCodeValidNum\": 0\n        },\n        \"watchListInfo\": [\n          {\n            \"enableRegister\": 1,\n            \"ID\": \"0\",\n            \"Type\": \"1\"\n          }\n        ],\n        \"faces\": [\n          {\n            \"faceData\": \"/9j/4AAQSkZRgABAQEAAAAAAAD/4QBCRXhpZgAATU..\"\n          }\n        ],\n        \"identiPhoto\": [\n          {\n            \"identiPhoto\": \"/9j/4AAQSkZRgABAQEAAAAAAAD/4QBCRXhpZgAATU..\"\n          }\n        ],\n        \"customField\": [\n          {\n            \"customID\": \"1\",\n            \"customFieldName\": \"\",\n            \"customFieldType\": 0,\n            \"customFieldValue\": \"\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete a Visitor Reservation Record",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/appointment/single/delete",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointRecordId\": \"5\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Edit a Visitor Reservation Record (V2)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v2/appointment/update",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receptionistId\": \"\",\n  \"appointStartTime\": \"2020-10-26T15:00:00+08:00\",\n  \"appointEndTime\": \"2020-10-29T15:00:00+08:00\",\n  \"visitReasonType\": 0,\n  \"visitReasonDetail\": \"null\",\n  \"accessInfo\": {\n    \"accessLevelList\": [\n      {\n        \"accessLevel\": {\n          \"id\": 1,\n          \"baseInfo\": {\n            \"name\": \"1\"\n          }\n        }\n      }\n    ]\n  },\n  \"visitorInfoList\": [\n    {\n      \"VisitorInfo\": {\n        \"visitorFamilyName\": \"null\",\n        \"visitorGivenName\": \"null\",\n        \"visitorGroupName\": \"Visitors\",\n        \"gender\": 1,\n        \"email\": \"\",\n        \"phoneNo\": \"13600000000\",\n        \"plateNo\": \"A\",\n        \"companyName\": \"hik\",\n        \"certificateType\": 111,\n        \"certificateNo\": \"null\",\n        \"remark\": \"null\",\n        \"accessInfo\": {\n          \"electrostaticDetectionType\": 0,\n          \"qrCodeValidNum\": 0\n        },\n        \"faces\": \"null\",\n        \"customField\": [\n          {\n            \"customID\": \"1\",\n            \"customFieldName\": \"\",\n            \"customFieldType\": 0,\n            \"customFieldValue\": \"\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Check Out a Visitor",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitor/out",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"appointRecordId\": \"1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get the List of Reservation Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/appointment/appointmentlist",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 100,\n  \"appointStartTime\": \"2021-04-09T15:00:00+08:00\",\n  \"appointEndTime\": \"2021-05-19T15:00:00+08:00\",\n  \"visitorName\": \"sad\",\n  \"companyName\": \"AAA\",\n  \"interviewName\": \"\",\n  \"appointCode\": \"\",\n  \"identiCode\": \"111\",\n  \"phoneNo\": \"\",\n  \"appointState\": -1,\n  \"visitorReason\": 4,\n  \"sortField\": \"VisitingTime\",\n  \"orderType\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "Get the Picture of a Visitor",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/appointment/downloadpicture",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitorId\": \"1\",\n  \"picType\": \"0\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Search Custom Visitor Fields",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitorconfig/customfields",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageIndex\": 0,\n  \"pageSize\": 0,\n  \"customFieldName\": \"abc\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Visitor Group Information by Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitorgroups",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"SearchCriteria\": {\n    \"visitorGroupName\": \"\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Search Visitors by Group ID",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitorgroups/groupinfo",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"VisitorListRequest\": {\n    \"indexCode\": \"1\",\n    \"pageIndex\": 0,\n    \"pageSize\": 0,\n    \"searchCriteria\": {\n      \"identifiyCode\": \"\",\n      \"personName\": \"\",\n      \"phoneNum\": \"\",\n      \"companyName\": \"\",\n      \"remperatureStatus\": 0,\n      \"blackLisitStatus\": 0\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Search Visitors by Condition",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitor/visitorInfo",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": \"0\",\n  \"pageSize\": \"20\",\n  \"searchCriteria\": {\n    \"visitorGroupID\": \"1,2,3\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Visitor Information by ID",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitor/single/visitorinfo",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitorId\": \"125\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Approve or Reject Visitor Reservation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitorapprovalflow/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Visitor\": {\n    \"operateType\": 0,\n    \"approvalOpinion\": \"null\",\n    \"ApprovalFlowInfo\": [\n      {\n        \"approvalFlowCode\": \"null\",\n        \"watchlistInfo\": {\n          \"id\": 0\n        }\n      }\n    ]\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Check Auto Review Status",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitorConfig/automaticApproval"
+          }
+        },
+        {
+          "name": "Get Visitor Status at a Certain Time",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/appointment/getVisitorStatus",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitorId\": \"1\",\n  \"visitTimePoint\": \"2023-01-01T12:00:00+08:00\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Visitor Check-In Records",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/register/getVistorRegisterRecord",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNo\": 1,\n  \"pageSize\": 100,\n  \"certificateNo\": \"335648978\",\n  \"visitorName\": \"aa\",\n  \"phoneNumber\": \"123456\",\n  \"companyName\": \"microsoft\",\n  \"visitReason\": \"1\",\n  \"visitorStatus\": \"0\",\n  \"visitStartTime\": \"2023-01-01T12:00:00+08:00\",\n  \"visitEndTime\": \"2023-01-02T12:00:00+08:00\",\n  \"sortField\": \"visitingTime\",\n  \"orderType\": \"0\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Visitor Approval Flow Details",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitorApprovalFlow/details",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approvalFlowCode\": \"2023112311\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Visitor Service Base Configuration",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/baseConfig/get"
+          }
+        },
+        {
+          "name": "Edit Visitor Service Base Configuration",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/baseConfig/update",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseConfig\": {\n    \"qRCodeMode\": 0,\n    \"qRCodeValidity\": 10,\n    \"validityUnit\": 0\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get the Visitor QR Code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitor/qr/get",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitorId\": \"125\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Edit Visitor Iris Information",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/visitor/visitorId/UpdateIrisinfo",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitorId\": 15,\n  \"IrisInfo\": [\n    {\n      \"name\": \"iris1\",\n      \"data\": \"MSVIy\",\n      \"rawData\": \"MQ\",\n      \"type\": 0\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Get the Visitor PIN Code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/artemis/api/visitor/v1/pincode/get"
+          }
+        }
+      ]
+    }
+  ]
+}

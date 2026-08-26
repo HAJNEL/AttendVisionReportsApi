@@ -11,7 +11,7 @@ namespace AttendVisionReportsApi.Controllers
 
         [HttpGet("issues")]
         public async Task<IActionResult> GetIssues(
-            [FromQuery] string dateFrom, [FromQuery] string dateTo, [FromQuery] string? department, [FromQuery] string? employeeId, [FromQuery] string? employeeType)
+            [FromQuery] string dateFrom, [FromQuery] string dateTo, [FromQuery] string? department, [FromQuery] string? employeeId, [FromQuery] Guid? attendanceGroupId)
         {
             try
             {
@@ -20,7 +20,7 @@ namespace AttendVisionReportsApi.Controllers
                 {
                     return Unauthorized(new { error = "No valid user ID found in claims." });
                 }
-                return Ok(await reportsService.GetIssuesAsync(dateFrom, dateTo, department, employeeId, employeeType, userId));
+                return Ok(await reportsService.GetIssuesAsync(dateFrom, dateTo, department, employeeId, attendanceGroupId, userId));
             }
             catch (Exception ex)
             {
@@ -32,7 +32,7 @@ namespace AttendVisionReportsApi.Controllers
         [HttpGet("clockings")]
         public async Task<IActionResult> GetClockings(
             [FromQuery] string dateFrom, [FromQuery] string dateTo,
-            [FromQuery] string? dept, [FromQuery] string? employeeId, [FromQuery] string? employeeType)
+            [FromQuery] string? dept, [FromQuery] string? employeeId, [FromQuery] Guid? attendanceGroupId)
         {
             try
             {
@@ -41,7 +41,7 @@ namespace AttendVisionReportsApi.Controllers
                 {
                     return Unauthorized(new { error = "No valid user ID found in claims." });
                 }
-                return Ok(await reportsService.GetClockingsAsync(dateFrom, dateTo, dept, employeeId, employeeType, userId));
+                return Ok(await reportsService.GetClockingsAsync(dateFrom, dateTo, dept, employeeId, attendanceGroupId, userId));
             }
             catch (Exception ex)
             {
@@ -52,7 +52,7 @@ namespace AttendVisionReportsApi.Controllers
         [HttpGet("timesheet")]
         public async Task<IActionResult> GetTimesheet(
             [FromQuery] string dateFrom, [FromQuery] string dateTo,
-            [FromQuery] string? dept, [FromQuery] string? employeeId, [FromQuery] string? employeeType)
+            [FromQuery] string? dept, [FromQuery] string? employeeId, [FromQuery] Guid? attendanceGroupId)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace AttendVisionReportsApi.Controllers
                 {
                     return Unauthorized(new { error = "No valid user ID found in claims." });
                 }
-                return Ok(await reportsService.GetTimesheetAsync(dateFrom, dateTo, dept, employeeId, employeeType, userId));
+                return Ok(await reportsService.GetTimesheetAsync(dateFrom, dateTo, dept, employeeId, attendanceGroupId, userId));
             }
             catch (Exception ex)
             {
@@ -72,7 +72,7 @@ namespace AttendVisionReportsApi.Controllers
         [HttpGet("sage-timesheet")]
         public async Task<IActionResult> GetSageTimesheet(
             [FromQuery] string dateFrom, [FromQuery] string dateTo,
-            [FromQuery] string? dept, [FromQuery] string? employeeId, [FromQuery] string? employeeType)
+            [FromQuery] string? dept, [FromQuery] string? employeeId, [FromQuery] Guid? attendanceGroupId)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace AttendVisionReportsApi.Controllers
                 {
                     return Unauthorized(new { error = "No valid user ID found in claims." });
                 }
-                return Ok(await reportsService.GetSageTimesheetAsync(dateFrom, dateTo, dept, employeeId, employeeType, userId));
+                return Ok(await reportsService.GetSageTimesheetAsync(dateFrom, dateTo, dept, employeeId, attendanceGroupId, userId));
             }
             catch (Exception ex)
             {

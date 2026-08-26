@@ -8,26 +8,49 @@ namespace AttendVisionReportsApi.Services
     public class FilterService : IFilterService
     {
         private readonly AppDbContext _context;
-        public FilterService(AppDbContext context)
+        private readonly IUserService _userService;
+        public FilterService(AppDbContext context, IUserService userService)
         {
             _context = context;
+            _userService = userService;
         }
 
-        public async Task<IEnumerable<EmployeeResult>> GetDepartmentEmployeesAsync(Guid? departmentId, System.Security.Claims.ClaimsPrincipal? user = null)
+        public async Task<IEnumerable<EmployeeResult>> GetDepartmentEmployeesAsync(Guid? departmentId, Guid? attendanceGroupId, System.Security.Claims.ClaimsPrincipal? user = null)
         {
             var query = _context.Employees.AsQueryable();
-            if (departmentId.HasValue)
-            {
-                query = query.Where(e => e.DepartmentId == departmentId.Value);
-            }
-            else if (user != null && Helpers.ClaimsHelper.TryGetUserId(user, out var userId, logClaims: false))
+
+            // Admins see every employee; everyone else only sees employees in
+            // departments they're linked to via DepartmentUsers - same allow-list
+            // pattern as EmployeesController.GetEmployees. A specific departmentId
+            // outside that allow-list yields no results rather than leaking that
+            // department's employees.
+            if (user != null && Helpers.ClaimsHelper.TryGetUserId(user, out var userId, logClaims: false)
+                && !await _userService.IsAdminAsync(userId))
             {
                 var departmentIds = await _context.DepartmentUsers
                     .Where(du => du.UserId == userId)
                     .Select(du => du.DepartmentId)
                     .ToListAsync();
 
-                query = query.Where(e => e.DepartmentId != null && departmentIds.Contains(e.DepartmentId.Value));
+                if (departmentId.HasValue)
+                {
+                    if (!departmentIds.Contains(departmentId.Value))
+                        return new List<EmployeeResult>();
+                }
+                else
+                {
+                    query = query.Where(e => e.DepartmentId != null && departmentIds.Contains(e.DepartmentId.Value));
+                }
+            }
+
+            if (departmentId.HasValue)
+            {
+                query = query.Where(e => e.DepartmentId == departmentId.Value);
+            }
+
+            if (attendanceGroupId.HasValue)
+            {
+                query = query.Where(e => e.AttendanceGroupId == attendanceGroupId.Value);
             }
 
             var result = await query

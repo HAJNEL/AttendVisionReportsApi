@@ -7,6 +7,6 @@ namespace AttendVisionReportsApi.Services
 {
     public interface IFilterService
     {
-        Task<IEnumerable<FilterService.EmployeeResult>> GetDepartmentEmployeesAsync(Guid? departmentId, ClaimsPrincipal? user = null);
+        Task<IEnumerable<FilterService.EmployeeResult>> GetDepartmentEmployeesAsync(Guid? departmentId, Guid? attendanceGroupId, ClaimsPrincipal? user = null);
     }
 }

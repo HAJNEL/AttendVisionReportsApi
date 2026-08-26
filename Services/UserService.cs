@@ -331,6 +331,17 @@ namespace AttendVisionReportsApi.Services
             return adminIds.Contains(userId);
         }
 
+        public async Task<bool> HasPermissionAsync(Guid userId, string uniqueCode)
+        {
+            return await (
+                from ur in db.UserRoles
+                join rp in db.RolePermissions on ur.RoleId equals rp.RoleId
+                join p in db.Permissions on rp.PermissionId equals p.Id
+                where ur.UserId == userId && p.UniqueCode != null && p.UniqueCode.ToLower() == uniqueCode.ToLower()
+                select p.Id
+            ).AnyAsync();
+        }
+
         // Shared by IsAdminAsync (single user) and GetUsersForCompanyAsync
         // (bulk) - "admin" here means holding the admin_dashboard
         // permission via any assigned role, matching the frontend's

@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION public.get_sage_timesheet(
 	p_date_to date,
 	p_dept text,
 	p_employee_id text,
-	p_employee_type text,
+	p_attendance_group_id text,
 	p_user_id uuid)
     RETURNS TABLE(empno text, emp_fullname text, company_code text, status text, normal_hours double precision, overtime_hours double precision, public_holiday_hours double precision)
     LANGUAGE 'plpgsql'
@@ -21,9 +21,9 @@ AS $BODY$
 BEGIN
     RETURN QUERY
     WITH base_timesheet AS (
-        -- Pass through employee type
+        -- Pass through attendance group
         SELECT *
-        FROM public.get_timesheet(p_date_from, p_date_to, p_dept, p_employee_id, p_employee_type, p_user_id)
+        FROM public.get_timesheet(p_date_from, p_date_to, p_dept, p_employee_id, p_attendance_group_id, p_user_id)
     ),
     public_holidays AS (
         SELECT ph.date::text

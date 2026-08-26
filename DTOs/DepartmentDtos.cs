@@ -33,4 +33,6 @@
         string? CompanyName,
         string? HikCentralOrgIndexCode
     );
+
+    public record DepartmentSyncResult(int TotalOrgs, int Created, int Updated, List<string> Warnings);
 }

@@ -49,6 +49,7 @@ public partial class Program
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IDashboardService, DashboardService>();
         builder.Services.AddScoped<IDepartmentsService, DepartmentsService>();
+        builder.Services.AddScoped<IDepartmentSyncService, DepartmentSyncService>();
         builder.Services.AddScoped<IReportsService, ReportsService>();
         builder.Services.AddScoped<ICompanyService, CompanyService>();
         builder.Services.AddScoped<IPermissionService, PermissionService>();
@@ -63,6 +64,13 @@ public partial class Program
         builder.Services.AddScoped<IEmployeeLeaveService, EmployeeLeaveService>();
         builder.Services.AddScoped<ITimeManagementService, TimeManagementService>();
         builder.Services.AddScoped<IEmployeeSyncService, EmployeeSyncService>();
+        builder.Services.AddScoped<ITempEmployeeService, TempEmployeeService>();
+        builder.Services.AddScoped<IDevicesService, DevicesService>();
+        builder.Services.AddScoped<IAttendanceGroupService, AttendanceGroupService>();
+        builder.Services.AddScoped<IInvoiceItemService, InvoiceItemService>();
+        builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+        builder.Services.AddScoped<IInvoiceSettingsService, InvoiceSettingsService>();
+        builder.Services.AddScoped<IInvoiceTemplateService, InvoiceTemplateService>();
 
         // Department Payment Rate Service
         builder.Services.AddScoped<DepartmentPaymentRateService>();

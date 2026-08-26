@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AttendVisionReportsApi.Controllers
 {
     [ApiController, Route("api/departments")]
-    public class DepartmentsController(IDepartmentsService departmentsService) : ControllerBase
+    public class DepartmentsController(IDepartmentsService departmentsService, IDepartmentSyncService departmentSyncService) : ControllerBase
     {
 
         [HttpGet]
@@ -50,5 +50,9 @@ namespace AttendVisionReportsApi.Controllers
             if (!await departmentsService.DeleteAsync(id)) return NotFound();
             return NoContent();
         }
+
+        [HttpPost("sync")]
+        public async Task<ActionResult<DepartmentSyncResult>> Sync(CancellationToken ct) =>
+            Ok(await departmentSyncService.SyncAllAsync(ct));
     }
 }

@@ -76,6 +76,7 @@ namespace AttendVisionReportsApi.DTOs
     public class DayPersonRowResponse
     {
         public string person { get; set; } = default!;
+        public string? employee_id { get; set; }
         public string department { get; set; } = default!;
         public long event_count { get; set; }
         public string first_time { get; set; } = default!;

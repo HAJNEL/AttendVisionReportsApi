@@ -7,21 +7,41 @@ namespace AttendVisionReportsApi.Services
 {
     public class RoleService(AppDbContext db) : IRoleService
     {
-        public async Task<IEnumerable<RoleDto>> GetAllAsync() =>
-            await db.Roles.Select(r => new RoleDto
-            {
-                Id = r.Id,
-                Name = r.Name,
-                Description = r.Description,
-            }).ToListAsync();
+        public async Task<IEnumerable<RoleDto>> GetAllAsync()
+        {
+            var roles = await db.Roles.ToListAsync();
+            var permissionIdsByRole = await db.RolePermissions
+                .GroupBy(rp => rp.RoleId)
+                .Select(g => new { RoleId = g.Key, PermissionIds = g.Select(rp => rp.PermissionId).ToList() })
+                .ToDictionaryAsync(g => g.RoleId, g => g.PermissionIds);
 
-        public async Task<RoleDto?> GetByIdAsync(Guid id) =>
-            await db.Roles.Where(r => r.Id == id).Select(r => new RoleDto
+            return roles.Select(r => new RoleDto
             {
                 Id = r.Id,
                 Name = r.Name,
                 Description = r.Description,
-            }).FirstOrDefaultAsync();
+                PermissionIds = permissionIdsByRole.TryGetValue(r.Id, out var ids) ? ids : new List<Guid>(),
+            });
+        }
+
+        public async Task<RoleDto?> GetByIdAsync(Guid id)
+        {
+            var role = await db.Roles.FindAsync(id);
+            if (role == null) return null;
+
+            var permissionIds = await db.RolePermissions
+                .Where(rp => rp.RoleId == id)
+                .Select(rp => rp.PermissionId)
+                .ToListAsync();
+
+            return new RoleDto
+            {
+                Id = role.Id,
+                Name = role.Name,
+                Description = role.Description,
+                PermissionIds = permissionIds,
+            };
+        }
 
         public async Task<RoleDto> CreateAsync(CreateRoleDto dto)
         {

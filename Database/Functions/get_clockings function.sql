@@ -1,13 +1,13 @@
 -- FUNCTION: public.get_clockings(date, date, text, text, text, uuid)
 
--- DROP FUNCTION IF EXISTS public.get_clockings(date, date, text, text, text, uuid);
+DROP FUNCTION IF EXISTS public.get_clockings(date, date, text, text, text, uuid);
 
 CREATE OR REPLACE FUNCTION public.get_clockings(
 	p_date_from date,
 	p_date_to date,
 	p_dept text,
 	p_employee_id text,
-	p_employee_type text,
+	p_attendance_group_id text,
 	p_user_id uuid)
     RETURNS TABLE(date text, person text, employee_id text, department text, access_time text, attendance_status text, authentication_result text)
     LANGUAGE 'plpgsql'
@@ -15,26 +15,10 @@ AS $BODY$
 BEGIN
     RETURN QUERY
     WITH
-    rate AS (
-      SELECT * FROM department_payment_rates
-      WHERE (p_employee_type IS NOT NULL AND p_employee_type <> '')
-            AND id = p_employee_type::uuid
-    ),
-    rate_match_key AS (
-      SELECT match_key, department_id FROM rate
-    ),
-    department_keys AS (
-      SELECT match_key FROM department_payment_rates
-      WHERE department_id = (
-          SELECT department_id FROM rate
-          WHERE (p_employee_type IS NOT NULL AND p_employee_type <> '') AND id = p_employee_type::uuid
-      )
-        AND match_key IS NOT NULL AND match_key <> ''
-    ),
     filtered_access_records AS (
       SELECT ar.*
       FROM access_records ar
-      LEFT JOIN rate_match_key rmk ON 1=1
+      LEFT JOIN employees emp ON emp.employee_no = ar.employee_id
       WHERE
         ar.access_date BETWEEN p_date_from AND p_date_to
         AND (
@@ -49,18 +33,8 @@ BEGIN
         )
         AND (p_employee_id IS NULL OR ar.employee_id = p_employee_id)
         AND (
-            p_employee_type IS NULL OR p_employee_type = ''
-            OR (
-                (SELECT match_key FROM rate_match_key LIMIT 1) IS NOT NULL
-                AND POSITION((SELECT match_key FROM rate_match_key LIMIT 1) IN ar.employee_id) > 0
-            )
-            OR (
-                (SELECT match_key FROM rate_match_key LIMIT 1) IS NULL
-                AND NOT EXISTS (
-                    SELECT 1 FROM department_keys dk
-                    WHERE POSITION(dk.match_key IN ar.employee_id) > 0
-                )
-            )
+            p_attendance_group_id IS NULL OR p_attendance_group_id = ''
+            OR emp.attendance_group_id = p_attendance_group_id::uuid
         )
     )
     SELECT
